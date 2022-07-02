@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Gameboard from "../Gameboard/Gameboard.js";
 // import HANDROW from NEW COMPONENT
 
 export default function LandingPage (props) {
