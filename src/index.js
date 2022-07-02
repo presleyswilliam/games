@@ -6,13 +6,17 @@ import reportWebVitals from './reportWebVitals';
 
 window.sequenceApp = {};
 
-// window.sequenceApp.boardState = Array(10).fill(0).map(x => Array(10).fill(0));
-// window.sequenceApp.sequences = Array(4).fill(0).map(x => Array(5).fill(0).map(y => Array(2).fill(0)));
-
 function detectMobile() {
   return ( ( window.innerWidth <= 800 ) /*&& ( window.innerHeight <= 600 )*/ );
 }
 window.sequenceApp.isMobile = detectMobile();
+
+let HOST = window.location.origin.replace(/^http/,'ws');
+let socket = new WebSocket(HOST);
+let el;
+socket.onmessage = function (event) {
+  console.log(event.data);
+}
 
 ReactDOM.render(
   <React.StrictMode>
