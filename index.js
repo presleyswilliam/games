@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
-const WebSocket = require('ws');
+const { instrument } = require('@socket.io/admin-ui');
+const socketIO = require('socket.io');
 const app = express();
 const PORT = process.env.PORT || 9000;
 
@@ -11,54 +12,28 @@ app.get('/', function (req, res) {
 });
 
 const server = app.listen(PORT);
-const webSocketServer = new WebSocket.Server({ server });
+const io = socketIO(server, {
+  cors: {
+    origin: ["https://admin.socket.io"],
+    credentials: true
+  }
+});
+
+instrument(io, {  // https://admin.socket.io/#/, Server URL: http://localhost:9000
+  auth: {
+    type: "basic",
+    username: "admin",
+    password: "$2a$10$EwMc/jsMWNv8sq6TW0hAtewJRQP/Gihy.WF8wyu5rimSjxeh0F7a6" // "pswiopass" encrypted with bcrypt 10, https://bcrypt-generator.com/
+  },
+});
+// instrument(io, { auth: false });  // https://admin.socket.io/#/, Server URL: http://localhost:9000
 
 app.use(express.json({}));
 
-var activeConnections = {}; // { clientID: clientSocket }; Assigned on new connection. Always in ascending order.
-var activeLobbies = {}; // { lobbyID: gameObject }; Assigned on room join. Always in ascending order.
-
-function getObjSize(objParam) {
-  return Object.keys(objParam).length;
-}
-function getObjLastKey(objParam) {
-  let objLen = getObjSize(objParam);
-  if (objLen === 0) { return undefined }
-  return Object.keys(objParam)[objLen-1];
-}
-function assignNewKey(socket, table) {
-  let lastKey = getObjLastKey(table);
-  if (lastKey === undefined) {
-    table[0] = socket;
-    socket.id = 0;
-  } else {
-    let newKey = parseInt(lastKey)+1;
-    table[newKey] = socket;
-    socket.id = newKey;
-  }
-  socket.send(JSON.stringify( { id: socket.id, activeConnections: Object.keys(table) } ));
-}
-function removeClosedSocket(socket, table) {
-  delete table[socket.id];
-}
-/***** TODO *****
- * 
- * Defragging activeConnections (re-organize IDs to have no gaps)
- * Check for broken sockets -> heartbeat functions
- * 
-****************/
-webSocketServer.on('connection', (ws, request) => {
-  // console.log(`Client ${ws.id} connected`);
-  assignNewKey(ws, activeConnections);
-
-  ws.on('message', (data) => {
-    console.log(`Client ${ws.id}: ${data}`)
-  });
-
-  ws.on('close', () => {
-    removeClosedSocket(ws, activeConnections);
-    // console.log(`Client ${ws.id} disconnected`);
-  });
+io.on('connection', (socket) => {
+  console.log(`Client ${socket.id} connected.`);
+  
+  socket.on('disconnect', () => console.log(`Client ${socket.id} disconnected.`));
 });
 
 function shuffle1DArray(array) {

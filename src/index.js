@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import socketIOClient from 'socket.io-client';
 
 window.sequenceApp = {};
 
@@ -12,11 +13,13 @@ function detectMobile() {
 window.sequenceApp.isMobile = detectMobile();
 
 let HOST = window.location.origin.replace(/^http/,'ws');
-let socket = new WebSocket(HOST);
-socket.onmessage = function (event) {
-  console.log(event.data);
-  socket.send('message');
-}
+let socket = socketIOClient(HOST);
+socket.on("connect", () => {
+  console.log(socket);
+});
+socket.on('sockets', (msg) => {
+  console.log(msg);
+});
 
 ReactDOM.render(
   <React.StrictMode>
