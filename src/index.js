@@ -13,9 +13,9 @@ window.sequenceApp.isMobile = detectMobile();
 
 let HOST = window.location.origin.replace(/^http/,'ws');
 let socket = new WebSocket(HOST);
-let el;
 socket.onmessage = function (event) {
   console.log(event.data);
+  socket.send('message');
 }
 
 ReactDOM.render(
