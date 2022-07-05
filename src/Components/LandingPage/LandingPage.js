@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-// import HANDROW from NEW COMPONENT
+import Lobbies from "../Lobbies/Lobbies";
 
 export default function LandingPage (props) {
 /* API */
@@ -13,11 +13,11 @@ export default function LandingPage (props) {
 
 /* JSX */
     let landingPageJSX;
-    landingPageJSX = <div>Landing Page</div>;
+    landingPageJSX = <Lobbies />;
 
     return (
-        <div>
+        <React.Fragment>
             {landingPageJSX}
-        </div>
+        </React.Fragment>
     );
 }

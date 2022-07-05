@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
-const { instrument } = require('@socket.io/admin-ui');
-const socketIO = require('socket.io');
+const { instrument } = require('@socket.io/admin-ui');  // https://admin.socket.io/#/
+const socketIO = require('socket.io');  // https://socket.io/docs/v4/server-api/
 const app = express();
 const PORT = process.env.PORT || 9000;
 
@@ -19,19 +19,58 @@ const io = socketIO(server, {
   }
 });
 
-instrument(io, {  // https://admin.socket.io/#/, Server URL: http://localhost:9000
+instrument(io, {  // Server URL: http://localhost:9000, u: admin, pass: pswiopass
   auth: {
     type: "basic",
     username: "admin",
     password: "$2a$10$EwMc/jsMWNv8sq6TW0hAtewJRQP/Gihy.WF8wyu5rimSjxeh0F7a6" // "pswiopass" encrypted with bcrypt 10, https://bcrypt-generator.com/
   },
 });
-// instrument(io, { auth: false });  // https://admin.socket.io/#/, Server URL: http://localhost:9000
 
 app.use(express.json({}));
 
+
+
+function ioGetAllRooms() {
+  // Convert map into 2D list:
+  // ==> [['4ziBKG9XFS06NdtVAAAH', Set(1)], ['room1', Set(2)], ...]
+  const arr = Array.from(io.sockets.adapter.rooms);
+  // Filter rooms whose name exist in set:
+  // ==> [['room1', Set(2)], ['room2', Set(2)]]
+  const filtered = arr.filter(room => !room[1].has(room[0]))
+  // Return only the room name: 
+  // ==> ['room1', 'room2']
+  const res = filtered.map(i => i[0]);
+  return res;
+}
+
+function getActiveLobbies(socket, clientCallback) {
+  let lobbies = ioGetAllRooms();
+
+  // Get number of people in lobby for each room
+  let numJoined = [];
+  for (let i = 0; i < lobbies.length; i++) {
+    // let room = io.sockets.adapter.rooms[lobbies[i]];
+    // numJoined.push(room.length);
+    let room = io.sockets.adapter.rooms.get(lobbies[i]);
+    numJoined.push(room.size);
+  }
+
+  clientCallback(lobbies, numJoined);
+}
+
+function newSequenceGame(socket, newRoomName, clientCallback) {
+  socket.join(newRoomName);
+
+  io.emit('updateLobbies', 'placeholder'); // Update lobbies on everyone's screen
+
+  clientCallback(`Success! Joined room ${newRoomName}, a game of Sequence.`);
+}
 io.on('connection', (socket) => {
   console.log(`Client ${socket.id} connected.`);
+  
+  socket.on("getActiveLobbies", (clientCallback) => { getActiveLobbies(socket, clientCallback); });
+  socket.on("newSequenceGame", (roomName, clientCallback) => { newSequenceGame(socket, roomName, clientCallback); });
   
   socket.on('disconnect', () => console.log(`Client ${socket.id} disconnected.`));
 });
