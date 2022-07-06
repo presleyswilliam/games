@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 export default function CreateNewGame (props) {
 /* API */
     function newSequenceGame(roomName) {
-        window.socket.emit('newSequenceGame', roomName, (response) => {
-            console.log(response);
+        window.socket.emit('newSequenceGame', roomName, (newRoomName) => {
+            console.log(`Success! Joined room ${newRoomName}, a game of Sequence.`);
         })
     }
     
@@ -61,11 +61,12 @@ export default function CreateNewGame (props) {
         newGameJSX = (
             <React.Fragment>
                 <div style={{...gameCard()}}>
+                    <br/>
                     <input placeholder='New Lobby Name' onInput={e => setNewLobbyName(e.target.value)} />
                     <select value={newLobbyGameType} onChange={e => setNewGameType(e.target.value)}>
                         <option value='sequence'>Sequence</option>
-                        <option value='connectFour'>Connect Four</option>
-                        <option value='trash'>Trash</option>
+                        <option value='connectFour' disabled>Connect Four</option>
+                        <option value='trash' disabled>Trash</option>
                     </select>
                     <button style={{...newGameButton()}} onClick={() => cancelNewGame()}>Cancel</button>
                     <button style={{...newGameButton()}} onClick={() => createNewGame()}>Create</button>

@@ -5,32 +5,33 @@ import CreateNewGame from './CreateNewGame/CreateNewGame';
 export default function Lobbies (props) {
 /* API */
     function getLobbies() {
-        window.socket.emit('getActiveLobbies', (lobbies, numJoined) => {  // response is array of lobby names
-            setLobbyArray(lobbies);
-            setNumJoined(numJoined);
+        window.socket.emit('getActiveLobbies', (lobbies) => {  // response is: { lobbyName0: { gameType0: <gameType0>, gameNumJoined0: <gameNumJoined0>, gameCapacity0: <gameCapacity0> } [,...{}] }
+            setLobbies(lobbies);
         })
     }
     
 /* Variables */
-    const [lobbies, setLobbyArray] = useState([]);
-    const [numJoined, setNumJoined] = useState([]);
+    const [lobbies, setLobbies] = useState({});
 
     useEffect(() => {
         getLobbies();
 
-        // setIntervalRef(setInterval(getBoardState, 1000));
-        // return clearInterval(intervalRef);  // Teardown function
+        window.socket.on('updateLobbies', () => { getLobbies(); });
+
+        return () => {  // Teardown function
+            window.socket.off('updateLobbies');
+        };
     }, []); // Initializes because of empty array dependency
     
 /* Functions */
-    window.socket.on('updateLobbies', (data) => { getLobbies(); });
+
 
 /* JSX */
     let lobbiesJSX;
     let lobbyCards;
     lobbyCards = 
-    lobbies.map(function(lobby, index) {
-        return <ActiveGameCard name={lobby} numJoined={numJoined[index]} />
+    Object.keys(lobbies).map(function(lobbyNameKey, index) {
+        return <ActiveGameCard name={lobbyNameKey} numJoined={lobbies[lobbyNameKey]['numJoined']} />
     });
 
     lobbiesJSX = <React.Fragment>{lobbyCards}<CreateNewGame /></React.Fragment>;

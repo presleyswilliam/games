@@ -4,6 +4,7 @@ const { instrument } = require('@socket.io/admin-ui');  // https://admin.socket.
 const socketIO = require('socket.io');  // https://socket.io/docs/v4/server-api/
 const app = express();
 const PORT = process.env.PORT || 9000;
+const Sequence = require('./src/GameDefinitions/Sequence');
 
 app.use(express.static(path.join(__dirname, 'build')));
 
@@ -31,7 +32,34 @@ app.use(express.json({}));
 
 
 
-function ioGetAllRooms() {
+/*** SocketIO Variables ***/
+var activeGames = {};  // { lobbyName: gameObj }
+// setInterval(() => {  // Prints activeGames
+//   let count = 0;
+//   let str = '';
+//   str += '{ ';
+//   for (const [key, value] of Object.entries(activeGames)) {
+//     if (count > 0) { str += ', '; }
+//     str += `${key}: ${value.gameType}`;
+//     count++;
+//   }
+//   str += ' }';
+//   console.log(str)
+//   console.log(process.memoryUsage())
+// }, 2000);
+
+
+/*** SocketIO Functions ***/
+function updateGameArray() {
+  let lobbyNames = ioGetAllRoomNames();
+  for (const [key, value] of Object.entries(activeGames)) {
+    if (lobbyNames.includes(key) === false) {
+      delete activeGames[key];
+    }
+  }
+}
+
+function ioGetAllRoomNames() {
   // Convert map into 2D list:
   // ==> [['4ziBKG9XFS06NdtVAAAH', Set(1)], ['room1', Set(2)], ...]
   const arr = Array.from(io.sockets.adapter.rooms);
@@ -44,90 +72,73 @@ function ioGetAllRooms() {
   return res;
 }
 
-function getActiveLobbies(socket, clientCallback) {
-  let lobbies = ioGetAllRooms();
-
-  // Get number of people in lobby for each room
-  let numJoined = [];
-  for (let i = 0; i < lobbies.length; i++) {
-    // let room = io.sockets.adapter.rooms[lobbies[i]];
-    // numJoined.push(room.length);
-    let room = io.sockets.adapter.rooms.get(lobbies[i]);
-    numJoined.push(room.size);
+function setLobbyNames(lobbies) {
+  let lobbyNames = ioGetAllRoomNames();
+  for (let i = 0; i < lobbyNames.length; i++) {
+    lobbies[lobbyNames[i]] = {};
   }
+  return;
+}
 
-  clientCallback(lobbies, numJoined);
+function setLobbyGameTypes(lobbies) {
+  for (const [key, value] of Object.entries(lobbies)) {
+    lobbies[key]['gameType'] = activeGames[key].gameType;
+  }
+  return;
+}
+
+function setNumJoined(lobbies) {
+  for (const [key, value] of Object.entries(lobbies)) {
+    let room = io.sockets.adapter.rooms.get(key);
+    lobbies[key]['numJoined'] = room.size;
+  }
+}
+
+function getActiveLobbies(socket, clientCallback) {
+  let lobbies = {}; // { lobbyName0: { gameType0: <gameType0>, gameNumJoined0: <gameNumJoined0>, gameCapacity0: <gameCapacity0> } [,...{}] }
+  
+  /* Get all room names */
+  setLobbyNames(lobbies);
+
+  /* Get room type for each room name */
+  setLobbyGameTypes(lobbies);
+
+  /* Get number of people in lobby for each room */
+  setNumJoined(lobbies);
+
+  /* Send back to client */
+  clientCallback(lobbies);
 }
 
 function newSequenceGame(socket, newRoomName, clientCallback) {
+  /* Join lobby (creates if not existing already) */
   socket.join(newRoomName);
+  activeGames[newRoomName] = new Sequence;
 
-  io.emit('updateLobbies', 'placeholder'); // Update lobbies on everyone's screen
+  /* Update object of room names and active games */
 
-  clientCallback(`Success! Joined room ${newRoomName}, a game of Sequence.`);
+  /* Update lobbies on everyone's screen */
+  io.emit('updateLobbies');
+
+  clientCallback(newRoomName);
 }
+
+function handleDisconnect(socket) {
+  io.emit('updateLobbies');
+  updateGameArray();
+
+  console.log(`Client ${socket.id} disconnected.`)
+}
+
+/*** SocketIO Logic ***/
 io.on('connection', (socket) => {
   console.log(`Client ${socket.id} connected.`);
   
   socket.on("getActiveLobbies", (clientCallback) => { getActiveLobbies(socket, clientCallback); });
   socket.on("newSequenceGame", (roomName, clientCallback) => { newSequenceGame(socket, roomName, clientCallback); });
   
-  socket.on('disconnect', () => console.log(`Client ${socket.id} disconnected.`));
+  socket.on('disconnect', () => { handleDisconnect(socket); });
 });
 
-function shuffle1DArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-  }
-}
 
-
-/*** Game Classes ***/
-class Sequence {
-  constructor() {
-    this.deck = ['black_joker','6_diamonds','7_diamonds','8_diamonds','9_diamonds','10_diamonds','Q_diamonds','K_diamonds','A_diamonds','black_joker',
-                  '5_diamonds','3_hearts','2_hearts','2_spades','3_spades','4_spades','5_spades','6_spades','7_spades','A_clubs',
-                  '4_diamonds','4_hearts','K_diamonds','A_diamonds','A_clubs','K_clubs','Q_clubs','10_clubs','8_spades','K_clubs',
-                  '3_diamonds','5_hearts','Q_diamonds','Q_hearts','10_hearts','9_hearts','8_hearts','9_clubs','9_spades','Q_clubs',
-                  '2_diamonds','6_hearts','10_diamonds','K_hearts','3_hearts','2_hearts','7_hearts','8_clubs','10_spades','10_clubs',
-                  'A_spades','7_hearts','9_diamonds','A_hearts','4_hearts','5_hearts','6_hearts','7_clubs','Q_spades','9_clubs',
-                  'K_spades','8_hearts','8_diamonds','2_clubs','3_clubs','4_clubs','5_clubs','6_clubs','K_spades','8_clubs',
-                  'Q_spades','9_hearts','7_diamonds','6_diamonds','5_diamonds','4_diamonds','3_diamonds','2_diamonds','A_spades','7_clubs',
-                  '10_spades','10_hearts','Q_hearts','K_hearts','A_hearts','2_clubs','3_clubs','4_clubs','5_clubs','6_clubs',
-                  'black_joker','9_spades','8_spades','7_spades','6_spades','5_spades','4_spades','3_spades','2_spades','black_joker',
-                  'J_twoEyed', 'J_twoEyed', 'J_twoEyed', 'J_twoEyed', 'J_oneEyed', 'J_oneEyed', 'J_oneEyed', 'J_oneEyed'];
-            
-    this.board = [ // Blue Layout
-      ['black_joker','6_diamonds','7_diamonds','8_diamonds','9_diamonds','10_diamonds','Q_diamonds','K_diamonds','A_diamonds','black_joker'],
-      ['5_diamonds','3_hearts','2_hearts','2_spades','3_spades','4_spades','5_spades','6_spades','7_spades','A_clubs'],
-      ['4_diamonds','4_hearts','K_diamonds','A_diamonds','A_clubs','K_clubs','Q_clubs','10_clubs','8_spades','K_clubs'],
-      ['3_diamonds','5_hearts','Q_diamonds','Q_hearts','10_hearts','9_hearts','8_hearts','9_clubs','9_spades','Q_clubs'],
-      ['2_diamonds','6_hearts','10_diamonds','K_hearts','3_hearts','2_hearts','7_hearts','8_clubs','10_spades','10_clubs'],
-      ['A_spades','7_hearts','9_diamonds','A_hearts','4_hearts','5_hearts','6_hearts','7_clubs','Q_spades','9_clubs'],
-      ['K_spades','8_hearts','8_diamonds','2_clubs','3_clubs','4_clubs','5_clubs','6_clubs','K_spades','8_clubs'],
-      ['Q_spades','9_hearts','7_diamonds','6_diamonds','5_diamonds','4_diamonds','3_diamonds','2_diamonds','A_spades','7_clubs'],
-      ['10_spades','10_hearts','Q_hearts','K_hearts','A_hearts','2_clubs','3_clubs','4_clubs','5_clubs','6_clubs'],
-      ['black_joker','9_spades','8_spades','7_spades','6_spades','5_spades','4_spades','3_spades','2_spades','black_joker']
-    ];
-
-    this.resetGame();
-  }
-
-  resetGame() {
-    this.deck = ['black_joker','6_diamonds','7_diamonds','8_diamonds','9_diamonds','10_diamonds','Q_diamonds','K_diamonds','A_diamonds','black_joker',
-                  '5_diamonds','3_hearts','2_hearts','2_spades','3_spades','4_spades','5_spades','6_spades','7_spades','A_clubs',
-                  '4_diamonds','4_hearts','K_diamonds','A_diamonds','A_clubs','K_clubs','Q_clubs','10_clubs','8_spades','K_clubs',
-                  '3_diamonds','5_hearts','Q_diamonds','Q_hearts','10_hearts','9_hearts','8_hearts','9_clubs','9_spades','Q_clubs',
-                  '2_diamonds','6_hearts','10_diamonds','K_hearts','3_hearts','2_hearts','7_hearts','8_clubs','10_spades','10_clubs',
-                  'A_spades','7_hearts','9_diamonds','A_hearts','4_hearts','5_hearts','6_hearts','7_clubs','Q_spades','9_clubs',
-                  'K_spades','8_hearts','8_diamonds','2_clubs','3_clubs','4_clubs','5_clubs','6_clubs','K_spades','8_clubs',
-                  'Q_spades','9_hearts','7_diamonds','6_diamonds','5_diamonds','4_diamonds','3_diamonds','2_diamonds','A_spades','7_clubs',
-                  '10_spades','10_hearts','Q_hearts','K_hearts','A_hearts','2_clubs','3_clubs','4_clubs','5_clubs','6_clubs',
-                  'black_joker','9_spades','8_spades','7_spades','6_spades','5_spades','4_spades','3_spades','2_spades','black_joker',
-                  'J_twoEyed', 'J_twoEyed', 'J_twoEyed', 'J_twoEyed', 'J_oneEyed', 'J_oneEyed', 'J_oneEyed', 'J_oneEyed'];
-    
-    shuffle1DArray(deck);
-  }
-
-}
+/*** GENERAL FUNCTIONS ***/
