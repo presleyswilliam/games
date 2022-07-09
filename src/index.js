@@ -17,7 +17,6 @@ window.socket = socketIOClient(HOST);
 // socket.on("connect", () => {
 //   console.log(socket);
 // });
-window.addEventListener("focus", () => window.socket.connect())
 
 ReactDOM.render(
   <React.StrictMode>

@@ -20,7 +20,7 @@ const io = socketIO(server, {
   }
 });
 io.eio.pingTimeout = 120000;  // 2 minutes
-io.eio.pingInterval = 30000; // 5 seconds
+io.eio.pingInterval = 5000; // 5 seconds
 
 instrument(io, {  // Server URL: http://localhost:9000, u: admin, pass: pswiopass
   auth: {
@@ -155,7 +155,7 @@ io.on('connection', (socket) => {
   socket.on("newGame", (gameType, roomName, clientCallback) => { newGame(socket, gameType, roomName, clientCallback); });
   socket.on("startGame", (gameType, roomName, clientCallback) => { startGame(socket, gameType, roomName, clientCallback)} );
   
-  socket.on('disconnect', () => { handleDisconnect(socket); });
+  socket.on('disconnect', () => { handleDisconnect(socket); }); // this may need to be a custom event so I can control when it's called
 });
 
 
