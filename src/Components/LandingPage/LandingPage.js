@@ -1,19 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
 import Lobbies from "../Lobbies/Lobbies";
+import Sequence from '../Sequence/Sequence';
 
 export default function LandingPage (props) {
 /* API */
     
 
 /* Variables */
+    const [gameName, setGameName] = useState('');
 
     
 /* Functions */
-    // handleClicks
+    useEffect(() => {
+        window.socket.on('startingGame', (gameName) => { setGameName(gameName); });
+
+        return () => {  // Teardown function
+            window.socket.off('startingGame');
+        };
+    }, []); // Initializes because of empty array dependency
+
 
 /* JSX */
     let landingPageJSX;
-    landingPageJSX = <Lobbies />;
+    if (gameName === '') {
+        landingPageJSX = <Lobbies />;
+    } else if (gameName === 'Sequence') {
+        landingPageJSX = <Sequence />;
+    }
 
     return (
         <React.Fragment>

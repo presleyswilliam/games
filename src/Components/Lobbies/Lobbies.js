@@ -7,12 +7,15 @@ export default function Lobbies (props) {
     function getLobbies() {
         window.socket.emit('getActiveLobbies', (lobbies) => {  // response is: { lobbyName0: { gameType0: <gameType0>, gameNumJoined0: <gameNumJoined0>, gameCapacity0: <gameCapacity0> } [,...{}] }
             setLobbies(lobbies);
+            console.log(lobbies)
         })
     }
     
 /* Variables */
     const [lobbies, setLobbies] = useState({});
 
+    
+/* Functions */
     useEffect(() => {
         getLobbies();
 
@@ -22,8 +25,6 @@ export default function Lobbies (props) {
             window.socket.off('updateLobbies');
         };
     }, []); // Initializes because of empty array dependency
-    
-/* Functions */
 
 
 /* JSX */
@@ -31,7 +32,7 @@ export default function Lobbies (props) {
     let lobbyCards;
     lobbyCards = 
     Object.keys(lobbies).map(function(lobbyNameKey, index) {
-        return <ActiveGameCard name={lobbyNameKey} numJoined={lobbies[lobbyNameKey]['numJoined']} />
+        return <ActiveGameCard name={lobbyNameKey} gameType={lobbies[lobbyNameKey]['gameType']} numJoined={lobbies[lobbyNameKey]['numJoined']} joined={lobbies[lobbyNameKey]['joined']}/>
     });
 
     lobbiesJSX = <React.Fragment>{lobbyCards}<CreateNewGame /></React.Fragment>;

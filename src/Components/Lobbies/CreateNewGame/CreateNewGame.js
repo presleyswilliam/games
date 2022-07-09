@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 export default function CreateNewGame (props) {
 /* API */
     function newSequenceGame(roomName) {
-        window.socket.emit('newSequenceGame', roomName, (newRoomName) => {
+        console.log('new sequence game')
+        window.socket.emit('newGame', 'Sequence', roomName, (newRoomName) => {
             console.log(`Success! Joined room ${newRoomName}, a game of Sequence.`);
         })
     }
@@ -12,22 +13,22 @@ export default function CreateNewGame (props) {
 /* Variables */
     const [newGameState, setNewGameState] = useState('newGameButton');
     const [newLobbyName, setNewLobbyName] = useState('');
-    const [newLobbyGameType, setNewGameType] = useState('sequence');
+    const [newLobbyGameType, setNewGameType] = useState('Sequence');
     
 /* Functions */
     function resetComponentState() {
         setNewGameState('newGameButton');
         setNewLobbyName('');
-        setNewGameType('sequence');
+        setNewGameType('Sequence');
     }
 
     function createNewGame() {
         if (newLobbyName === '') { alert('Please enter a room name.'); return; }
-        if (newLobbyGameType === 'sequence') {
+        if (newLobbyGameType === 'Sequence') {
             newSequenceGame(newLobbyName);
-        } else if (newLobbyGameType === 'connectFour') {
+        } else if (newLobbyGameType === 'ConnectFour') {
             // newConnectFourGame();
-        } else if (newLobbyGameType === 'trash') {
+        } else if (newLobbyGameType === 'Trash') {
             // newTrashGame();
         }
 
@@ -64,9 +65,9 @@ export default function CreateNewGame (props) {
                     <br/>
                     <input placeholder='New Lobby Name' onInput={e => setNewLobbyName(e.target.value)} />
                     <select value={newLobbyGameType} onChange={e => setNewGameType(e.target.value)}>
-                        <option value='sequence'>Sequence</option>
-                        <option value='connectFour' disabled>Connect Four</option>
-                        <option value='trash' disabled>Trash</option>
+                        <option value='Sequence'>Sequence</option>
+                        <option value='ConnectFour' disabled>Connect Four</option>
+                        <option value='Trash' disabled>Trash</option>
                     </select>
                     <button style={{...newGameButton()}} onClick={() => cancelNewGame()}>Cancel</button>
                     <button style={{...newGameButton()}} onClick={() => createNewGame()}>Create</button>

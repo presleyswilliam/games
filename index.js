@@ -33,7 +33,7 @@ app.use(express.json({}));
 
 
 /*** SocketIO Variables ***/
-var activeGames = {};  // { lobbyName: gameObj }
+var activeGames = {}; // { lobbyName: { game: <game>, gameNumJoined: <gameNumJoined>, gameCapacity: <gameCapacity> } [,...{}] }
 // setInterval(() => {  // Prints activeGames
 //   let count = 0;
 //   let str = '';
@@ -65,57 +65,66 @@ function ioGetAllRoomNames() {
   const arr = Array.from(io.sockets.adapter.rooms);
   // Filter rooms whose name exist in set:
   // ==> [['room1', Set(2)], ['room2', Set(2)]]
-  const filtered = arr.filter(room => !room[1].has(room[0]))
+  const filtered = arr.filter(room => !room[1].has(room[0]));
   // Return only the room name: 
   // ==> ['room1', 'room2']
-  const res = filtered.map(i => i[0]);
-  return res;
+  const rooms = filtered.map(i => i[0]);
+  return rooms;
 }
 
-function setLobbyNames(lobbies) {
-  let lobbyNames = ioGetAllRoomNames();
-  for (let i = 0; i < lobbyNames.length; i++) {
-    lobbies[lobbyNames[i]] = {};
-  }
-  return;
+function getSocketRooms(socket) {
+  const arr = Array.from(socket.rooms);
+  const filtered = arr.filter(room => room !== socket.id);
+  return filtered;
 }
 
-function setLobbyGameTypes(lobbies) {
-  for (const [key, value] of Object.entries(lobbies)) {
-    lobbies[key]['gameType'] = activeGames[key].gameType;
-  }
-  return;
-}
-
-function setNumJoined(lobbies) {
-  for (const [key, value] of Object.entries(lobbies)) {
-    let room = io.sockets.adapter.rooms.get(key);
-    lobbies[key]['numJoined'] = room.size;
-  }
+function getNumJoined(roomName) {
+  let room = io.sockets.adapter.rooms.get(roomName);
+  numJoined = room.size;
+  return numJoined;
 }
 
 function getActiveLobbies(socket, clientCallback) {
-  let lobbies = {}; // { lobbyName0: { gameType0: <gameType0>, gameNumJoined0: <gameNumJoined0>, gameCapacity0: <gameCapacity0> } [,...{}] }
+  /* Update numJoined */
+  for (const [key, value] of Object.entries(activeGames)) {
+    activeGames[key]['numJoined'] = getNumJoined(key);
+  }
   
-  /* Get all room names */
-  setLobbyNames(lobbies);
+  /* Get info from activeGames object */
+  let modifiedActiveGames = {};
+  let socketRooms = getSocketRooms(socket);
+  for (const [key, value] of Object.entries(activeGames)) {
+    /* name */
+    modifiedActiveGames[key] = {};
 
-  /* Get room type for each room name */
-  setLobbyGameTypes(lobbies);
+    /* gameType */
+    modifiedActiveGames[key]['gameType'] = activeGames[key]['game'].gameType;
 
-  /* Get number of people in lobby for each room */
-  setNumJoined(lobbies);
+    /* numJoined */
+    modifiedActiveGames[key]['numJoined'] = activeGames[key]['numJoined'];
+
+    /* joined flag */
+    let joined = false;
+    if (socketRooms.includes(key)) { joined = true; }
+    modifiedActiveGames[key]['joined'] = joined;
+  }
 
   /* Send back to client */
-  clientCallback(lobbies);
+  clientCallback(modifiedActiveGames);
 }
 
-function newSequenceGame(socket, newRoomName, clientCallback) {
+function newGame(socket, gameType, newRoomName, clientCallback) {
+  console.log("newGame")
   /* Join lobby (creates if not existing already) */
   socket.join(newRoomName);
-  activeGames[newRoomName] = new Sequence;
 
   /* Update object of room names and active games */
+  if (gameType === 'Sequence') {
+    activeGames[newRoomName] = { game: new Sequence };
+  }
+
+  /* Add numJoined to object */
+  activeGames[newRoomName]['numJoined'] = getNumJoined(newRoomName);
 
   /* Update lobbies on everyone's screen */
   io.emit('updateLobbies');
@@ -123,9 +132,15 @@ function newSequenceGame(socket, newRoomName, clientCallback) {
   clientCallback(newRoomName);
 }
 
+function startGame(socket, gameType, roomName, clientCallback) {
+  io.to(roomName).emit('startingGame', gameType);
+
+  clientCallback(`Success! Started game of ${gameType} in room ${roomName}.`);
+}
+
 function handleDisconnect(socket) {
-  io.emit('updateLobbies');
   updateGameArray();
+  io.emit('updateLobbies');
 
   console.log(`Client ${socket.id} disconnected.`)
 }
@@ -135,7 +150,8 @@ io.on('connection', (socket) => {
   console.log(`Client ${socket.id} connected.`);
   
   socket.on("getActiveLobbies", (clientCallback) => { getActiveLobbies(socket, clientCallback); });
-  socket.on("newSequenceGame", (roomName, clientCallback) => { newSequenceGame(socket, roomName, clientCallback); });
+  socket.on("newGame", (gameType, roomName, clientCallback) => { newGame(socket, gameType, roomName, clientCallback); });
+  socket.on("startGame", (gameType, roomName, clientCallback) => { startGame(socket, gameType, roomName, clientCallback)} );
   
   socket.on('disconnect', () => { handleDisconnect(socket); });
 });
