@@ -20,7 +20,7 @@ const io = socketIO(server, {
   }
 });
 io.eio.pingTimeout = 120000;  // 2 minutes
-io.eio.pingInterval = 5000; // 5 seconds
+io.eio.pingInterval = 30000; // 5 seconds
 
 instrument(io, {  // Server URL: http://localhost:9000, u: admin, pass: pswiopass
   auth: {
