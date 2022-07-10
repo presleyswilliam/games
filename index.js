@@ -184,6 +184,7 @@ io.on('connection', (socket) => {
   console.log(`Client ${socket.id} connected.`);
   
   socket.on("getActiveLobbies", (clientCallback) => { getActiveLobbies(socket, clientCallback); });
+  socket.on("updateLobbies", (clientCallback) => { io.emit('updateLobbies'); });
   socket.on("newGame", (gameType, roomName, clientCallback) => { newGame(socket, gameType, roomName, clientCallback); });
   socket.on("joinGame", (gameType, roomName, clientCallback) => { joinGame(socket, gameType, roomName, clientCallback); });
   socket.on("startGame", (gameType, roomName, clientCallback) => { startGame(socket, gameType, roomName)} );

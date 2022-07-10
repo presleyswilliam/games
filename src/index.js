@@ -23,6 +23,7 @@ function reconnect() {
   window.socket.emit('joinGame', room, (roomJoined) => {
     if (roomJoined === undefined) { window.sessionStorage.removeItem('roomName'); }
   });
+  window.socket.emit('updateLobbies');
 }
 
 ReactDOM.render(
