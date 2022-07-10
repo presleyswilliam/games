@@ -3,9 +3,9 @@ import React, { useState, useEffect } from 'react';
 export default function CreateNewGame (props) {
 /* API */
     function newSequenceGame(roomName) {
-        console.log('new sequence game')
         window.socket.emit('newGame', 'Sequence', roomName, (newRoomName) => {
-            console.log(`Success! Joined room ${newRoomName}, a game of Sequence.`);
+            window.sessionStorage.setItem('roomName', roomName);
+            console.log(`Joined room ${newRoomName}, a game of Sequence.`);
         })
     }
     

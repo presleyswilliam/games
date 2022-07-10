@@ -14,9 +14,16 @@ window.sequenceApp.isMobile = detectMobile();
 
 let HOST = window.location.origin.replace(/^http/,'ws');
 window.socket = socketIOClient(HOST);
-// socket.on("connect", () => {
-//   console.log(socket);
-// });
+window.socket.on("connect", () => {
+  reconnect();
+});
+function reconnect() {
+  let room = window.sessionStorage.getItem('roomName');
+  if (room === null) { return; }
+  window.socket.emit('joinGame', room, (roomJoined) => {
+    if (roomJoined === undefined) { window.sessionStorage.removeItem('roomName'); }
+  });
+}
 
 ReactDOM.render(
   <React.StrictMode>

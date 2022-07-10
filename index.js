@@ -36,27 +36,33 @@ app.use(express.json({}));
 
 /*** SocketIO Variables ***/
 var activeGames = {}; // { lobbyName: { game: <game>, gameNumJoined: <gameNumJoined>, gameCapacity: <gameCapacity> } [,...{}] }
-// setInterval(() => {  // Prints activeGames
-//   let count = 0;
-//   let str = '';
-//   str += '{ ';
-//   for (const [key, value] of Object.entries(activeGames)) {
-//     if (count > 0) { str += ', '; }
-//     str += `${key}: ${value.gameType}`;
-//     count++;
-//   }
-//   str += ' }';
-//   console.log(str)
-//   console.log(process.memoryUsage())
-// }, 2000);
+var abandonedGames = {}; // { lobbyName: { game: <game>, gameNumJoined: <gameNumJoined>, gameCapacity: <gameCapacity> } [,...{}] }
+
 
 
 /*** SocketIO Functions ***/
+function moveGameToActive(key) {
+  if (!Object.hasOwn(abandonedGames, key)) { return; }
+  clearTimeout(abandonedGames[key]['timeoutRef']);
+  delete abandonedGames[key]['timeoutRef'];
+  console.log('cleared timeout')
+  activeGames[key] = structuredClone(abandonedGames[key]);
+  delete abandonedGames[key];
+}
+function moveGameToAbandoned(key) {
+  if (!Object.hasOwn(activeGames, key)) { return; }
+  abandonedGames[key] = structuredClone(activeGames[key]);
+  abandonedGames[key]['timeoutRef'] = setTimeout(() => {
+    console.log('deleted')
+    delete abandonedGames[key];
+  }, 10000);
+  delete activeGames[key];
+}
 function updateGameArray() {
   let lobbyNames = ioGetAllRoomNames();
   for (const [key, value] of Object.entries(activeGames)) {
     if (lobbyNames.includes(key) === false) {
-      delete activeGames[key];
+      moveGameToAbandoned(key);
     }
   }
 }
@@ -116,7 +122,10 @@ function getActiveLobbies(socket, clientCallback) {
 }
 
 function newGame(socket, gameType, newRoomName, clientCallback) {
-  console.log("newGame")
+  /* Leave current lobby if already in one */
+  getSocketRooms(socket).forEach( (room) => { socket.leave(room); } );
+  updateGameArray();
+
   /* Join lobby (creates if not existing already) */
   socket.join(newRoomName);
 
@@ -134,10 +143,31 @@ function newGame(socket, gameType, newRoomName, clientCallback) {
   clientCallback(newRoomName);
 }
 
-function startGame(socket, gameType, roomName, clientCallback) {
-  io.to(roomName).emit('startingGame', gameType);
+function joinGame(socket, roomName, clientCallback) {
+  /* Join lobby */
+  if (Object.hasOwn(activeGames, roomName) || Object.hasOwn(abandonedGames, roomName)) {
+    /* Leave current lobby if already in one */
+    getSocketRooms(socket).forEach( (room) => { socket.leave(room); } );
+    updateGameArray();
 
-  clientCallback(`Success! Started game of ${gameType} in room ${roomName}.`);
+    /* Join lobby */
+    socket.join(roomName);
+
+    /* Brings back expired game if on recently abandoned */
+    moveGameToActive(roomName);
+    
+    /* Update lobbies on everyone's screen */
+    io.emit('updateLobbies');
+    
+    clientCallback(roomName);
+  } else {
+    /* Return undefined if join unsucecssful */
+    clientCallback(undefined);
+  }
+}
+
+function startGame(socket, gameType, roomName) {
+  io.to(roomName).emit('startingGame', gameType);
 }
 
 function handleDisconnect(socket) {
@@ -153,7 +183,8 @@ io.on('connection', (socket) => {
   
   socket.on("getActiveLobbies", (clientCallback) => { getActiveLobbies(socket, clientCallback); });
   socket.on("newGame", (gameType, roomName, clientCallback) => { newGame(socket, gameType, roomName, clientCallback); });
-  socket.on("startGame", (gameType, roomName, clientCallback) => { startGame(socket, gameType, roomName, clientCallback)} );
+  socket.on("joinGame", (gameType, roomName, clientCallback) => { joinGame(socket, gameType, roomName, clientCallback); });
+  socket.on("startGame", (roomName, clientCallback) => { startGame(socket, roomName)} );
   
   socket.on('disconnect', () => { handleDisconnect(socket); }); // this may need to be a custom event so I can control when it's called
 });
