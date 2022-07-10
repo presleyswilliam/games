@@ -186,7 +186,7 @@ io.on('connection', (socket) => {
   socket.on("getActiveLobbies", (clientCallback) => { getActiveLobbies(socket, clientCallback); });
   socket.on("newGame", (gameType, roomName, clientCallback) => { newGame(socket, gameType, roomName, clientCallback); });
   socket.on("joinGame", (gameType, roomName, clientCallback) => { joinGame(socket, gameType, roomName, clientCallback); });
-  socket.on("startGame", (roomName, clientCallback) => { startGame(socket, roomName)} );
+  socket.on("startGame", (gameType, roomName, clientCallback) => { startGame(socket, gameType, roomName)} );
   
   socket.on('disconnect', () => { handleDisconnect(socket); }); // this may need to be a custom event so I can control when it's called
 });
