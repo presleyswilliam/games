@@ -46,12 +46,14 @@ function moveGameToActive(key) {
   clearTimeout(abandonedGames[key]['timeoutRef']);
   delete abandonedGames[key]['timeoutRef'];
   console.log('cleared timeout')
-  activeGames[key] = structuredClone(abandonedGames[key]);
+  // activeGames[key] = structuredClone(abandonedGames[key]);
+  activeGames[key] = JSON.parse(JSON.stringify((abandonedGames[key])));
   delete abandonedGames[key];
 }
 function moveGameToAbandoned(key) {
   if (!Object.hasOwn(activeGames, key)) { return; }
-  abandonedGames[key] = structuredClone(activeGames[key]);
+  // abandonedGames[key] = structuredClone(activeGames[key]);
+  abandonedGames[key] = JSON.parse(JSON.stringify((activeGames[key])));
   abandonedGames[key]['timeoutRef'] = setTimeout(() => {
     console.log('deleted')
     delete abandonedGames[key];
