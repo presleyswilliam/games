@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ActiveGameCard from "./ActiveGameCard/ActiveGameCard";
 import CreateNewGame from './CreateNewGame/CreateNewGame';
+import { Box } from "@mui/material";
 
 export default function Lobbies (props) {
 /* API */
@@ -35,7 +36,7 @@ export default function Lobbies (props) {
         return <ActiveGameCard name={lobbyNameKey} gameType={lobbies[lobbyNameKey]['gameType']} numJoined={lobbies[lobbyNameKey]['numJoined']} joined={lobbies[lobbyNameKey]['joined']}/>
     });
 
-    lobbiesJSX = <div>{lobbyCards}<CreateNewGame /></div>;
+    lobbiesJSX = <Box sx={{ display: 'flex', justifyContent: 'center', p: 1, m: 1, bgcolor: 'background.paper', borderRadius: 1 }}>{lobbyCards}<CreateNewGame /></Box>;
 
     return (
         <React.Fragment>

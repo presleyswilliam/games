@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Button from '@mui/material/Button';
+import { Button, Card, CardActions, CardContent, Typography } from "@mui/material";
 
 export default function ActiveGameCard (props) {
 /* API */
@@ -24,12 +24,7 @@ function joinGame(roomName) {
 
 
 /* CSS Classes */
-    let gameCard = () => ({
-        display: 'inline-block',
-        height: '6em',
-        width: '10em',
-        borderRadius: '0.5em',
-        margin: '1em',
+    let card = () => ({
         backgroundColor: props.joined ? 'lightgreen' : 'lightgray'
     });
 
@@ -41,12 +36,23 @@ function joinGame(roomName) {
     let gameType = props.gameType;
     let startJoinButton;
     if (props.joined) {
-        startJoinButton = <React.Fragment><br/><Button variant='contained' size='small' onClick={() => startGame(props.gameType, props.name)}>Start</Button></React.Fragment>;
+        startJoinButton = <Button variant='contained' size='small' onClick={() => startGame(props.gameType, props.name)}>Start</Button>;
     } else {
-        startJoinButton = <React.Fragment><br/><Button variant='contained' size='small' onClick={() => joinGame(props.name)}>Join</Button></React.Fragment>;
+        startJoinButton = <Button variant='contained' size='small' onClick={() => joinGame(props.name)}>Join</Button>;
     }
 
-    gameCardJSX = <div style={{...gameCard()}}>{title}<br/>{gameType}<br/>{`(${numJoined})`}{startJoinButton}</div>;
+    gameCardJSX = (
+        <Card sx={{ minWidth: 1/8 }} style={{ ...card() }}>
+            <CardContent>
+                <Typography>{title}</Typography>
+                <Typography>{gameType}</Typography>
+                <Typography>{`(${numJoined})`}</Typography>
+            </CardContent>
+            <CardActions sx={{ justifyContent: 'center' }}>
+                <Typography>{startJoinButton}</Typography>
+            </CardActions>
+        </Card>
+    );
 
     return (
         <React.Fragment>
