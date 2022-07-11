@@ -57,7 +57,7 @@ function moveGameToAbandoned(key) {
   abandonedGames[key]['timeoutRef'] = setTimeout(() => {
     console.log('deleted')
     delete abandonedGames[key];
-  }, 10000);
+  }, 300000);  // 300000: 5min, 10000: 10sec
   delete activeGames[key];
 }
 function updateGameArray() {

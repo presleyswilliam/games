@@ -18,8 +18,8 @@ export default function Gameboard (props) {
     gameboardJSX = <div>Gamboard</div>;
 
     return (
-        <div>
+        <React.Fragment>
             {gameboardJSX}
-        </div>
+        </React.Fragment>
     );
 }

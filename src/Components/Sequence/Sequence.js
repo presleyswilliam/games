@@ -19,8 +19,8 @@ export default function Sequence (props) {
     sequenceJSX = <Gameboard />;
 
     return (
-        <div>
+        <React.Fragment>
             {sequenceJSX}
-        </div>
+        </React.Fragment>
     );
 }

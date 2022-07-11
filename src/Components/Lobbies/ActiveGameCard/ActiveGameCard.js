@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Button from '@mui/material/Button';
 
 export default function ActiveGameCard (props) {
 /* API */
@@ -38,14 +39,14 @@ function joinGame(roomName) {
     let title = props.name;
     let numJoined = props.numJoined;
     let gameType = props.gameType;
-    let startJoinButton = <React.Fragment></React.Fragment>;
+    let startJoinButton;
     if (props.joined) {
-        startJoinButton = <React.Fragment><br/><button onClick={() => startGame(props.gameType, props.name)}>Start</button></React.Fragment>;
+        startJoinButton = <React.Fragment><br/><Button variant='contained' size='small' onClick={() => startGame(props.gameType, props.name)}>Start</Button></React.Fragment>;
     } else {
-        startJoinButton = <React.Fragment><br/><button onClick={() => joinGame(props.name)}>Join</button></React.Fragment>;
+        startJoinButton = <React.Fragment><br/><Button variant='contained' size='small' onClick={() => joinGame(props.name)}>Join</Button></React.Fragment>;
     }
 
-    gameCardJSX = <div style={{...gameCard()}}><br/>{title}<br/>{gameType}<br/>{`(${numJoined})`}{startJoinButton}</div>;
+    gameCardJSX = <div style={{...gameCard()}}>{title}<br/>{gameType}<br/>{`(${numJoined})`}{startJoinButton}</div>;
 
     return (
         <React.Fragment>

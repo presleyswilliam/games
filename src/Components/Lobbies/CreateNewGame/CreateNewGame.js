@@ -41,7 +41,8 @@ export default function CreateNewGame (props) {
 
 /* CSS Classes */
     let newGameButton = () => ({
-        display: 'inline-block'
+        display: 'inline-block',
+        margin: '1em'
     });
     let gameCard = () => ({
         display: 'inline-block',
@@ -51,13 +52,16 @@ export default function CreateNewGame (props) {
         margin: '1em',
         backgroundColor: 'lightgray'
     });
+    let createButton = () => ({
+        display: 'inline-block'
+    });
 
 
 /* JSX */
     let newGameJSX;
     
     if (newGameState === 'newGameButton'){
-        newGameJSX = <button style={{...newGameButton()}} onClick={() => setNewGameState('chooseOptions')}>Create New Game</button>;
+        newGameJSX = <React.Fragment><button style={{...newGameButton()}} onClick={() => setNewGameState('chooseOptions')}>Create New Game</button></React.Fragment>;
     } else if (newGameState === 'chooseOptions') {
         newGameJSX = (
             <React.Fragment>
@@ -69,8 +73,8 @@ export default function CreateNewGame (props) {
                         <option value='ConnectFour' disabled>Connect Four</option>
                         <option value='Trash' disabled>Trash</option>
                     </select>
-                    <button style={{...newGameButton()}} onClick={() => cancelNewGame()}>Cancel</button>
-                    <button style={{...newGameButton()}} onClick={() => createNewGame()}>Create</button>
+                    <button style={{...createButton()}} onClick={() => cancelNewGame()}>Cancel</button>
+                    <button style={{...createButton()}} onClick={() => createNewGame()}>Create</button>
                 </div>
             </React.Fragment>
         )
