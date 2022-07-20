@@ -33,10 +33,11 @@ export default function Lobbies (props) {
     let lobbyCards;
     lobbyCards = 
     Object.keys(lobbies).map(function(lobbyNameKey, index) {
+        if (lobbies[lobbyNameKey]['joined'] && lobbies[lobbyNameKey]['isStarted']) { props.setGameName(lobbies[lobbyNameKey]['gameType']) }
         return <ActiveGameCard name={lobbyNameKey} gameType={lobbies[lobbyNameKey]['gameType']} numJoined={lobbies[lobbyNameKey]['numJoined']} joined={lobbies[lobbyNameKey]['joined']}/>
     });
 
-    lobbiesJSX = <Box sx={{ display: 'flex', justifyContent: 'center', p: 1, m: 1, bgcolor: 'background.paper', borderRadius: 1 }}>{lobbyCards}<CreateNewGame /></Box>;
+    lobbiesJSX = <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', p: 1, m: 1, bgcolor: 'background.paper', borderRadius: 1 }}>{lobbyCards}<CreateNewGame /></Box>;
 
     return (
         <React.Fragment>

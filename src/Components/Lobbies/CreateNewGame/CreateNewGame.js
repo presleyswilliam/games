@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Button, Card, CardActions, MenuItem, Select, TextField } from "@mui/material";
 
 export default function CreateNewGame (props) {
 /* API */
-    function newSequenceGame(roomName) {
-        window.socket.emit('newGame', 'Sequence', roomName, (newRoomName) => {
+    function newGame(roomName, gameType) {
+        window.socket.emit('newGame', gameType, roomName, (newRoomName) => {
             window.sessionStorage.setItem('roomName', roomName);
-            console.log(`Joined room ${newRoomName}, a game of Sequence.`);
         })
     }
     
@@ -13,24 +13,19 @@ export default function CreateNewGame (props) {
 /* Variables */
     const [newGameState, setNewGameState] = useState('newGameButton');
     const [newLobbyName, setNewLobbyName] = useState('');
-    const [newLobbyGameType, setNewGameType] = useState('Sequence');
+    const [newLobbyGameType, setNewGameType] = useState('');
     
 /* Functions */
     function resetComponentState() {
         setNewGameState('newGameButton');
         setNewLobbyName('');
-        setNewGameType('Sequence');
+        setNewGameType('');
     }
 
     function createNewGame() {
         if (newLobbyName === '') { alert('Please enter a room name.'); return; }
-        if (newLobbyGameType === 'Sequence') {
-            newSequenceGame(newLobbyName);
-        } else if (newLobbyGameType === 'ConnectFour') {
-            // newConnectFourGame();
-        } else if (newLobbyGameType === 'Trash') {
-            // newTrashGame();
-        }
+        if (newLobbyGameType === '') { alert('Please select a game type.'); return; }
+        newGame(newLobbyName, newLobbyGameType);
 
         resetComponentState();
     }
@@ -40,20 +35,13 @@ export default function CreateNewGame (props) {
 
 
 /* CSS Classes */
-    let newGameButton = () => ({
-        display: 'inline-block',
-        margin: '1em'
-    });
     let gameCard = () => ({
         display: 'inline-block',
-        height: '6em',
-        width: '10em',
+        height: '7em',
+        width: '12em',
         borderRadius: '0.5em',
         margin: '1em',
         backgroundColor: 'lightgray'
-    });
-    let createButton = () => ({
-        display: 'inline-block'
     });
 
 
@@ -61,21 +49,24 @@ export default function CreateNewGame (props) {
     let newGameJSX;
     
     if (newGameState === 'newGameButton'){
-        newGameJSX = <React.Fragment><button style={{...newGameButton()}} onClick={() => setNewGameState('chooseOptions')}>Create New Game</button></React.Fragment>;
+        newGameJSX = <React.Fragment><Button variant='contained' size='small' onClick={() => setNewGameState('chooseOptions')}>Create New Game</Button></React.Fragment>;
     } else if (newGameState === 'chooseOptions') {
         newGameJSX = (
             <React.Fragment>
-                <div style={{...gameCard()}}>
+                <Card sx={{ width: 200, borderRadius: '0.5em', backgroundColor: 'lightgrey' }}>
                     <br/>
-                    <input placeholder='New Lobby Name' onInput={e => setNewLobbyName(e.target.value)} />
-                    <select value={newLobbyGameType} onChange={e => setNewGameType(e.target.value)}>
-                        <option value='Sequence'>Sequence</option>
-                        <option value='ConnectFour' disabled>Connect Four</option>
-                        <option value='Trash' disabled>Trash</option>
-                    </select>
-                    <button style={{...createButton()}} onClick={() => cancelNewGame()}>Cancel</button>
-                    <button style={{...createButton()}} onClick={() => createNewGame()}>Create</button>
-                </div>
+                    <TextField variant='outlined' sx={{ width: 8/10 }} size='small' label='New Lobby Name' onInput={e => setNewLobbyName(e.target.value)} />
+                    <TextField variant='outlined' sx={{ width: 8/10, margin: 1 }} size='small' label='- Select Game -' value={newLobbyGameType} select onChange={e => setNewGameType(e.target.value)}>
+                        <MenuItem value='TicTacToe'>TicTacToe</MenuItem>
+                        <MenuItem value='Sequence' disabled>Sequence</MenuItem>
+                        <MenuItem value='ConnectFour' disabled>Connect Four</MenuItem>
+                        <MenuItem value='Trash' disabled>Trash</MenuItem>
+                    </TextField>
+                    <CardActions sx={{ justifyContent: 'center' }}>
+                        <Button variant='contained' size='small' onClick={() => cancelNewGame()}>Cancel</Button>
+                        <Button variant='contained' size='small' onClick={() => createNewGame()}>Create</Button>
+                    </CardActions>
+                </Card>
             </React.Fragment>
         )
     }

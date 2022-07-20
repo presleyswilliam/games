@@ -5,6 +5,7 @@ const socketIO = require('socket.io');  // https://socket.io/docs/v4/server-api/
 const app = express();
 const PORT = process.env.PORT || 9000;
 const Sequence = require('./src/GameDefinitions/Sequence');
+const TicTacToe = require('./src/GameDefinitions/TicTacToe');
 
 app.use(express.static(path.join(__dirname, 'build')));
 
@@ -110,6 +111,9 @@ function getActiveLobbies(socket, clientCallback) {
     /* gameType */
     modifiedActiveGames[key]['gameType'] = activeGames[key]['game'].gameType;
 
+    /* isStarted */
+    modifiedActiveGames[key]['isStarted'] = activeGames[key]['game'].isStarted;
+
     /* numJoined */
     modifiedActiveGames[key]['numJoined'] = activeGames[key]['numJoined'];
 
@@ -134,6 +138,8 @@ function newGame(socket, gameType, newRoomName, clientCallback) {
   /* Update object of room names and active games */
   if (gameType === 'Sequence') {
     activeGames[newRoomName] = { game: new Sequence };
+  } else if (gameType === 'TicTacToe') {
+    activeGames[newRoomName] = { game: new TicTacToe };
   }
 
   /* Add numJoined to object */
@@ -169,6 +175,7 @@ function joinGame(socket, roomName, clientCallback) {
 }
 
 function startGame(socket, gameType, roomName) {
+  activeGames[roomName]['game'].isStarted = true;
   io.to(roomName).emit('startingGame', gameType);
 }
 
@@ -177,6 +184,19 @@ function handleDisconnect(socket) {
   io.emit('updateLobbies');
 
   console.log(`Client ${socket.id} disconnected.`)
+}
+
+function getGameBoard(socket, roomName, clientCallback) {
+  let gameboard = activeGames?.[roomName]?.['game']?.board;
+
+  clientCallback(gameboard);
+}
+
+function setPiece(socket, roomName, coord, clientCallback) {
+  // if checks for turn and valid placement are OK
+  activeGames[roomName]['game'].board[coord[0]][coord[1]] = 'set';
+
+  io.emit('updateGameboard');
 }
 
 /*** SocketIO Logic ***/
@@ -188,6 +208,10 @@ io.on('connection', (socket) => {
   socket.on("newGame", (gameType, roomName, clientCallback) => { newGame(socket, gameType, roomName, clientCallback); });
   socket.on("joinGame", (gameType, roomName, clientCallback) => { joinGame(socket, gameType, roomName, clientCallback); });
   socket.on("startGame", (gameType, roomName, clientCallback) => { startGame(socket, gameType, roomName)} );
+
+  socket.on("getGameBoard", (roomName, clientCallback) => { getGameBoard(socket, roomName, clientCallback)} );
+
+  socket.on("setPiece", (roomName, coord, clientCallback) => { setPiece(socket, roomName, coord, clientCallback)} );
   
   socket.on('disconnect', () => { handleDisconnect(socket); }); // this may need to be a custom event so I can control when it's called
 });

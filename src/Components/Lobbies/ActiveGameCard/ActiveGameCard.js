@@ -42,7 +42,7 @@ function joinGame(roomName) {
     }
 
     gameCardJSX = (
-        <Card sx={{ minWidth: 1/8 }} style={{ ...card() }}>
+        <Card sx={{ width: 200, borderRadius: '0.5em', margin: 1 }} style={{ ...card() }}>
             <CardContent>
                 <Typography>{title}</Typography>
                 <Typography>{gameType}</Typography>

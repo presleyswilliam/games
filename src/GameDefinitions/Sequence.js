@@ -1,6 +1,7 @@
 class Sequence {
     constructor() {
       this.gameType = 'Sequence';
+      this.isStarted = false;
       this.deck = ['black_joker','6_diamonds','7_diamonds','8_diamonds','9_diamonds','10_diamonds','Q_diamonds','K_diamonds','A_diamonds','black_joker',
                     '5_diamonds','3_hearts','2_hearts','2_spades','3_spades','4_spades','5_spades','6_spades','7_spades','A_clubs',
                     '4_diamonds','4_hearts','K_diamonds','A_diamonds','A_clubs','K_clubs','Q_clubs','10_clubs','8_spades','K_clubs',
@@ -28,7 +29,7 @@ class Sequence {
 
       this.turn;
   
-      this.resetGame();
+      this.startGame();
     }
 
     shuffle1DArray(array) {
@@ -38,7 +39,7 @@ class Sequence {
         }
       }
   
-    resetGame() {
+    startGame() {
       this.deck = ['black_joker','6_diamonds','7_diamonds','8_diamonds','9_diamonds','10_diamonds','Q_diamonds','K_diamonds','A_diamonds','black_joker',
                     '5_diamonds','3_hearts','2_hearts','2_spades','3_spades','4_spades','5_spades','6_spades','7_spades','A_clubs',
                     '4_diamonds','4_hearts','K_diamonds','A_diamonds','A_clubs','K_clubs','Q_clubs','10_clubs','8_spades','K_clubs',

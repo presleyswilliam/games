@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Lobbies from "../Lobbies/Lobbies";
+import TicTacToe from '../TicTacToe/TicTacToe';
 import Sequence from '../Sequence/Sequence';
 
 export default function LandingPage (props) {
@@ -23,7 +24,9 @@ export default function LandingPage (props) {
 /* JSX */
     let landingPageJSX;
     if (gameName === '') {
-        landingPageJSX = <Lobbies />;
+        landingPageJSX = <Lobbies setGameName={setGameName} />;
+    } else if (gameName === 'TicTacToe') {
+        landingPageJSX = <TicTacToe />;
     } else if (gameName === 'Sequence') {
         landingPageJSX = <Sequence />;
     }
