@@ -37,7 +37,7 @@ export default function Lobbies (props) {
         return <ActiveGameCard name={lobbyNameKey} gameType={lobbies[lobbyNameKey]['gameType']} numJoined={lobbies[lobbyNameKey]['numJoined']} joined={lobbies[lobbyNameKey]['joined']}/>
     });
 
-    lobbiesJSX = <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', p: 1, m: 1, bgcolor: 'background.paper', borderRadius: 1 }}>{lobbyCards}<CreateNewGame /></Box>;
+    lobbiesJSX = <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 1, margin: 1, bgcolor: 'background.paper', borderRadius: 1 }}>{lobbyCards}<CreateNewGame /></Box>;
 
     return (
         <React.Fragment>
