@@ -34,20 +34,21 @@ function joinGame(roomName) {
     let gameCardJSX;
     let title = props.name;
     let numJoined = props.numJoined;
+    let maxPlayers = props.maxPlayers;
     let gameType = props.gameType;
     let startJoinButton;
     if (props.joined) {
-        startJoinButton = <Button variant='contained' size='small' onClick={() => startGame(props.gameType, props.name)}>Start</Button>;
+        startJoinButton = <Button variant='contained' size='small' disabled={!props.canStart} onClick={() => startGame(props.gameType, props.name)}>Start</Button>;
     } else {
-        startJoinButton = <Button variant='contained' size='small' onClick={() => joinGame(props.name)}>Join</Button>;
+        startJoinButton = <Button variant='contained' size='small' disabled={!props.canJoin} onClick={() => joinGame(props.name)}>Join</Button>;
     }
 
     gameCardJSX = (
         <Card sx={{ width: 200, borderRadius: '0.5em', margin: 1 }} style={{ ...card() }}>
             <CardContent>
                 <Typography>{title}</Typography>
-                <Typography>{gameType}</Typography>
-                <Typography>{`(${numJoined})`}</Typography>
+                <Typography sx={{ fontFamily: 'Monospace'}}>{gameType}</Typography>
+                <Typography>{`Joined: ${numJoined} / ${maxPlayers}`}</Typography>
             </CardContent>
             <CardActions sx={{ justifyContent: 'center' }}>
                 <Typography>{startJoinButton}</Typography>

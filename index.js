@@ -117,6 +117,10 @@ function getActiveLobbies(socket, clientCallback) {
     /* numJoined */
     modifiedActiveGames[key]['numJoined'] = activeGames[key]['numJoined'];
 
+    /* Min and Max Players */
+    modifiedActiveGames[key]['minPlayers'] = activeGames[key]['game'].minPlayers;
+    modifiedActiveGames[key]['maxPlayers'] = activeGames[key]['game'].maxPlayers;
+
     /* joined flag */
     let joined = false;
     if (socketRooms.includes(key)) { joined = true; }

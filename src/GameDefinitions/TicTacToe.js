@@ -1,6 +1,8 @@
 class TicTacToe {
     constructor() {
       this.gameType = 'TicTacToe';
+      this.minPlayers = 2;
+      this.maxPlayers = 2;
       this.isStarted = false;
               
       this.board = [

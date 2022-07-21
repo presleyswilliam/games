@@ -34,7 +34,7 @@ export default function Lobbies (props) {
     lobbyCards = 
     Object.keys(lobbies).map(function(lobbyNameKey, index) {
         if (lobbies[lobbyNameKey]['joined'] && lobbies[lobbyNameKey]['isStarted']) { props.setGameName(lobbies[lobbyNameKey]['gameType']) } else if (lobbies[lobbyNameKey]['isStarted'] === true) { return; }
-        return <ActiveGameCard name={lobbyNameKey} gameType={lobbies[lobbyNameKey]['gameType']} numJoined={lobbies[lobbyNameKey]['numJoined']} joined={lobbies[lobbyNameKey]['joined']}/>
+        return <ActiveGameCard name={lobbyNameKey} gameType={lobbies[lobbyNameKey]['gameType']} maxPlayers={lobbies[lobbyNameKey]['maxPlayers']} canJoin={lobbies[lobbyNameKey]['numJoined'] < lobbies[lobbyNameKey]['maxPlayers']} canStart={lobbies[lobbyNameKey]['numJoined'] >= lobbies[lobbyNameKey]['minPlayers'] && lobbies[lobbyNameKey]['numJoined'] <= lobbies[lobbyNameKey]['maxPlayers']} numJoined={lobbies[lobbyNameKey]['numJoined']} joined={lobbies[lobbyNameKey]['joined']}/>
     });
 
     lobbiesJSX = <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 1, margin: 1, bgcolor: 'background.paper', borderRadius: 1 }}>{lobbyCards}<CreateNewGame /></Box>;
