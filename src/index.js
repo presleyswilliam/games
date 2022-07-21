@@ -15,12 +15,14 @@ window.sequenceApp.isMobile = detectMobile();
 let HOST = window.location.origin.replace(/^http/,'ws');
 window.socket = socketIOClient(HOST);
 window.socket.on("connect", () => {
+  if (window.sessionStorage.getItem('teamName') === null) { window.sessionStorage.setItem('teamName', window.socket.id) }
   reconnect();
 });
 function reconnect() {
+  let teamName = window.sessionStorage.getItem('teamName');
   let room = window.sessionStorage.getItem('roomName');
   if (room === null) { return; }
-  window.socket.emit('joinGame', room, (roomJoined) => {
+  window.socket.emit('joinGame', room, teamName, (roomJoined) => {
     if (roomJoined === undefined) { window.sessionStorage.removeItem('roomName'); }
   });
   window.socket.emit('updateLobbies');

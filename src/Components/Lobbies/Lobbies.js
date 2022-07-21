@@ -33,7 +33,7 @@ export default function Lobbies (props) {
     let lobbyCards;
     lobbyCards = 
     Object.keys(lobbies).map(function(lobbyNameKey, index) {
-        if (lobbies[lobbyNameKey]['joined'] && lobbies[lobbyNameKey]['isStarted']) { props.setGameName(lobbies[lobbyNameKey]['gameType']) }
+        if (lobbies[lobbyNameKey]['joined'] && lobbies[lobbyNameKey]['isStarted']) { props.setGameName(lobbies[lobbyNameKey]['gameType']) } else if (lobbies[lobbyNameKey]['isStarted'] === true) { return; }
         return <ActiveGameCard name={lobbyNameKey} gameType={lobbies[lobbyNameKey]['gameType']} numJoined={lobbies[lobbyNameKey]['numJoined']} joined={lobbies[lobbyNameKey]['joined']}/>
     });
 

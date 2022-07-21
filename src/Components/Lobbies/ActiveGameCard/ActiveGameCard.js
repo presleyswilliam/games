@@ -10,7 +10,8 @@ function startGame(gameType, roomName) {
 }
 
 function joinGame(roomName) {
-    window.socket.emit('joinGame', roomName, (roomName) => {
+    let teamName = window.sessionStorage.getItem('teamName');
+    window.socket.emit('joinGame', roomName, teamName, (roomName) => {
         window.sessionStorage.setItem('roomName', roomName);
         console.log(`Success! Joined room ${roomName}.`)
     })

@@ -26,9 +26,9 @@ export default function LandingPage (props) {
     if (gameName === '') {
         landingPageJSX = <Lobbies setGameName={setGameName} />;
     } else if (gameName === 'TicTacToe') {
-        landingPageJSX = <TicTacToe />;
+        landingPageJSX = <TicTacToe setGameName={setGameName} />;
     } else if (gameName === 'Sequence') {
-        landingPageJSX = <Sequence />;
+        landingPageJSX = <Sequence setGameName={setGameName} />;
     }
 
     return (

@@ -16,7 +16,7 @@ export default function TicTacToe (props) {
 
 /* JSX */
     let tttJSX;
-    tttJSX = <Gameboard />;
+    tttJSX = <Gameboard setGameName={props.setGameName} />;
 
     return (
         <React.Fragment>

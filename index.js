@@ -127,7 +127,7 @@ function getActiveLobbies(socket, clientCallback) {
   clientCallback(modifiedActiveGames);
 }
 
-function newGame(socket, gameType, newRoomName, clientCallback) {
+function newGame(socket, gameType, newRoomName, teamName, clientCallback) {
   /* Leave current lobby if already in one */
   getSocketRooms(socket).forEach( (room) => { socket.leave(room); } );
   updateGameArray();
@@ -145,17 +145,26 @@ function newGame(socket, gameType, newRoomName, clientCallback) {
   /* Add numJoined to object */
   activeGames[newRoomName]['numJoined'] = getNumJoined(newRoomName);
 
+  /* Push socket team to game */
+  activeGames[newRoomName]['game'].teams.push(teamName);
+
   /* Update lobbies on everyone's screen */
   io.emit('updateLobbies');
 
   clientCallback(newRoomName);
 }
 
-function joinGame(socket, roomName, clientCallback) {
+function joinGame(socket, roomName, teamName, clientCallback) {
   /* Join lobby */
   if (Object.hasOwn(activeGames, roomName) || Object.hasOwn(abandonedGames, roomName)) {
     /* Leave current lobby if already in one */
-    getSocketRooms(socket).forEach( (room) => { socket.leave(room); } );
+    getSocketRooms(socket).forEach( function(room) {
+      socket.leave(room);
+
+      /* Remove team from game when leaving */
+      let indexOfTeam = activeGames[room]['game'].teams.findIndex( (el) => el === teamName);
+      activeGames[room]['game'].teams.splice(indexOfTeam, 1);
+    });
     updateGameArray();
 
     /* Join lobby */
@@ -163,6 +172,9 @@ function joinGame(socket, roomName, clientCallback) {
 
     /* Brings back expired game if on recently abandoned */
     moveGameToActive(roomName);
+
+    /* Push socket team to game */
+    activeGames[roomName]['game'].teams.push(teamName);
     
     /* Update lobbies on everyone's screen */
     io.emit('updateLobbies');
@@ -174,8 +186,26 @@ function joinGame(socket, roomName, clientCallback) {
   }
 }
 
+function leaveGame(socket, roomName, teamName, clientCallback) {
+  /* Leave game */
+  socket.leave(roomName);
+
+  /* Remove team from game when leaving */
+  let indexOfTeam = activeGames[roomName]['game'].teams.findIndex( (el) => el === teamName);
+  activeGames[roomName]['game'].teams.splice(indexOfTeam, 1);
+
+  /* Delete from active games */
+  let room = io.sockets.adapter.rooms.get(roomName);
+  if (room === undefined) {
+    delete activeGames[roomName];
+  }
+
+  clientCallback(roomName);
+}
+
 function startGame(socket, gameType, roomName) {
   activeGames[roomName]['game'].isStarted = true;
+  activeGames[roomName]['game'].startGame();
   io.to(roomName).emit('startingGame', gameType);
 }
 
@@ -188,13 +218,14 @@ function handleDisconnect(socket) {
 
 function getGameBoard(socket, roomName, clientCallback) {
   let gameboard = activeGames?.[roomName]?.['game']?.board;
+  let winner = activeGames[roomName]['game'].checkWin();
 
-  clientCallback(gameboard);
+  clientCallback(gameboard, winner);
 }
 
-function setPiece(socket, roomName, coord, clientCallback) {
+function setPiece(socket, roomName, teamName, coord, clientCallback) {
   // if checks for turn and valid placement are OK
-  activeGames[roomName]['game'].board[coord[0]][coord[1]] = 'set';
+  activeGames[roomName]['game'].setPiece(teamName, coord);
 
   io.emit('updateGameboard');
 }
@@ -205,13 +236,14 @@ io.on('connection', (socket) => {
   
   socket.on("getActiveLobbies", (clientCallback) => { getActiveLobbies(socket, clientCallback); });
   socket.on("updateLobbies", (clientCallback) => { io.emit('updateLobbies'); });
-  socket.on("newGame", (gameType, roomName, clientCallback) => { newGame(socket, gameType, roomName, clientCallback); });
-  socket.on("joinGame", (gameType, roomName, clientCallback) => { joinGame(socket, gameType, roomName, clientCallback); });
+  socket.on("newGame", (gameType, roomName, teamName, clientCallback) => { newGame(socket, gameType, roomName, teamName, clientCallback); });
+  socket.on("joinGame", (roomName, teamName, clientCallback) => { joinGame(socket, roomName, teamName, clientCallback); });
+  socket.on("leaveGame", (roomName, teamName, clientCallback) => { leaveGame(socket, roomName, teamName, clientCallback); });
   socket.on("startGame", (gameType, roomName, clientCallback) => { startGame(socket, gameType, roomName)} );
 
   socket.on("getGameBoard", (roomName, clientCallback) => { getGameBoard(socket, roomName, clientCallback)} );
 
-  socket.on("setPiece", (roomName, coord, clientCallback) => { setPiece(socket, roomName, coord, clientCallback)} );
+  socket.on("setPiece", (roomName, teamName, coord, clientCallback) => { setPiece(socket, roomName, teamName, coord, clientCallback)} );
   
   socket.on('disconnect', () => { handleDisconnect(socket); }); // this may need to be a custom event so I can control when it's called
 });
