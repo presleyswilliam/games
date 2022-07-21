@@ -47,8 +47,7 @@ function joinGame(roomName) {
         <Card sx={{ width: 200, borderRadius: '0.5em', margin: 1 }} style={{ ...card() }}>
             <CardContent>
                 <Typography>{title}</Typography>
-                <Typography sx={{ fontFamily: 'Monospace'}}>{gameType}</Typography>
-                <Typography>{`Joined: ${numJoined} / ${maxPlayers}`}</Typography>
+                <Typography sx={{ fontFamily: 'Monospace'}}>{`${gameType} (${numJoined}/${maxPlayers})`}</Typography>
             </CardContent>
             <CardActions sx={{ justifyContent: 'center' }}>
                 <Typography>{startJoinButton}</Typography>
