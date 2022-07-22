@@ -63,7 +63,7 @@ function moveGameToAbandoned(key) {
   }, 300000);  // 300000: 5min, 10000: 10sec
   delete activeGames[key];
 }
-function updateGameArray() {
+function abondonEmptyLobbies() {
   let lobbyNames = ioGetAllRoomNames();
   for (const [key, value] of Object.entries(activeGames)) {
     if (lobbyNames.includes(key) === false) {
@@ -136,9 +136,9 @@ function getActiveLobbies(socket, clientCallback) {
 function newGame(socket, gameType, newRoomName, teamName, clientCallback) {
   /* Leave current lobby if already in one */
   getSocketRooms(socket).forEach( (room) => { socket.leave(room); } );
-  updateGameArray();
+  abondonEmptyLobbies();
 
-  /* Join lobby (creates if not existing already) */
+  /* Create lobby */
   socket.join(newRoomName);
 
   /* Update object of room names and active games */
@@ -171,7 +171,7 @@ function joinGame(socket, roomName, teamName, clientCallback) {
       let indexOfTeam = activeGames[room]['game'].teams.findIndex( (el) => el === teamName);
       activeGames[room]['game'].teams.splice(indexOfTeam, 1);
     });
-    updateGameArray();
+    abondonEmptyLobbies();
 
     /* Join lobby */
     socket.join(roomName);
@@ -230,7 +230,7 @@ function setPiece(socket, roomName, teamName, coord, clientCallback) {
 }
 
 function handleDisconnect(socket) {
-  updateGameArray();
+  abondonEmptyLobbies();
   io.emit('updateLobbies');
 
   console.log(`Client ${socket.id} disconnected.`)
