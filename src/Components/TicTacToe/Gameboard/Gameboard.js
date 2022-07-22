@@ -67,7 +67,7 @@ function returnToLobbies() {
     let returnButton = <Button sx={{ margin: 1 }} variant='contained' size='small' onClick={() => returnToLobbies()}><Typography sx={{ fontFamily: 'Monospace'}}>{'Return to Lobbies'}</Typography></Button>;
 
     gameboardJSX = (
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '100vw' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
             <Typography sx={{ fontFamily: 'Monospace', fontSize: '2em' }}>{winnerText}</Typography>
             {board}
             {winner !== null ? returnButton : <React.Fragment></React.Fragment>}
