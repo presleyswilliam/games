@@ -14,7 +14,12 @@ function getGameBoard() {
 /* Variables */
 const [gameboard, setGameboard] = useState([['', '', ''],['', '', ''],['', '', '']]);
 const [winner, setWinner] = useState(null);
+
 let teamName = window.sessionStorage.getItem('teamName');
+let winnerText = '';
+if (winner === teamName) { winnerText = 'You Win!'; }
+else if (winner === 'cat') { winnerText = '🐈'; }
+else if (winner !== null) { winnerText = 'You Lose :('; }
 
 /* Functions */
 useEffect(() => {
@@ -50,11 +55,7 @@ function returnToLobbies() {
 
 /* JSX */
     let gameboardJSX;
-    // gameboardJSX = (<React.Fragment>
-    // <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.paper', borderRadius: 1 }}><Card>1</Card><Card>2</Card><Card>3</Card></Box>
-    // <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.paper', borderRadius: 1 }}><Card>4</Card><Card>5</Card><Card>6</Card></Box>
-    // <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.paper', borderRadius: 1 }}><Card>7</Card><Card>8</Card><Card>9</Card></Box>
-    // </React.Fragment>);
+    
     let board = <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         {gameboard.map(function (row, rowIndex) {
             return <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.paper', borderRadius: 1 }}>{row.map(function(item, colIndex) {
@@ -62,11 +63,12 @@ function returnToLobbies() {
             })}</Box>
         })}
     </Box>;
+
     let returnButton = <Button sx={{ margin: 1 }} variant='contained' size='small' onClick={() => returnToLobbies()}><Typography sx={{ fontFamily: 'Monospace'}}>{'Return to Lobbies'}</Typography></Button>;
 
     gameboardJSX = (
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '100vw' }}>
-            <Typography sx={{ fontFamily: 'Monospace', fontSize: '2em' }}>{winner === teamName ? 'You Win!' : winner === null ? '' : 'You Lose :('}</Typography>
+            <Typography sx={{ fontFamily: 'Monospace', fontSize: '2em' }}>{winnerText}</Typography>
             {board}
             {winner !== null ? returnButton : <React.Fragment></React.Fragment>}
         </Box>

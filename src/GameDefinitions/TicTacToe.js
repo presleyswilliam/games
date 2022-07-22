@@ -37,6 +37,7 @@ class TicTacToe {
           }
         }
       }
+      if (!this.board[0].includes('') && !this.board[1].includes('') && !this.board[2].includes('')) { return 'cat'; }
       return null;
     }
 
