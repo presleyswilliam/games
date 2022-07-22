@@ -49,12 +49,14 @@ function moveGameToActive(key) {
   console.log('cleared timeout')
   // activeGames[key] = structuredClone(abandonedGames[key]);
   activeGames[key] = JSON.parse(JSON.stringify((abandonedGames[key])));
+  activeGames[key]['game'] = abandonedGames[key]['game']; // class obj doesn't get copied properly with functions
   delete abandonedGames[key];
 }
 function moveGameToAbandoned(key) {
   if (!Object.hasOwn(activeGames, key)) { return; }
   // abandonedGames[key] = structuredClone(activeGames[key]);
   abandonedGames[key] = JSON.parse(JSON.stringify((activeGames[key])));
+  abandonedGames[key]['game'] = activeGames[key]['game']; // class obj doesn't get copied properly with functions
   abandonedGames[key]['timeoutRef'] = setTimeout(() => {
     console.log('deleted')
     delete abandonedGames[key];
@@ -178,7 +180,7 @@ function joinGame(socket, roomName, teamName, clientCallback) {
     moveGameToActive(roomName);
 
     /* Push socket team to game */
-    activeGames[roomName]['game'].teams.push(teamName);
+    if (!activeGames[roomName]['game'].teams.includes(teamName)) { activeGames[roomName]['game'].teams.push(teamName); }
     
     /* Update lobbies on everyone's screen */
     io.emit('updateLobbies');
@@ -213,13 +215,6 @@ function startGame(socket, gameType, roomName) {
   io.to(roomName).emit('startingGame', gameType);
 }
 
-function handleDisconnect(socket) {
-  updateGameArray();
-  io.emit('updateLobbies');
-
-  console.log(`Client ${socket.id} disconnected.`)
-}
-
 function getGameBoard(socket, roomName, clientCallback) {
   let gameboard = activeGames?.[roomName]?.['game']?.board;
   let winner = activeGames[roomName]['game'].checkWin();
@@ -232,6 +227,13 @@ function setPiece(socket, roomName, teamName, coord, clientCallback) {
   activeGames[roomName]['game'].setPiece(teamName, coord);
 
   io.emit('updateGameboard');
+}
+
+function handleDisconnect(socket) {
+  updateGameArray();
+  io.emit('updateLobbies');
+
+  console.log(`Client ${socket.id} disconnected.`)
 }
 
 /*** SocketIO Logic ***/
