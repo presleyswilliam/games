@@ -2,7 +2,7 @@ class TicTacToe {
     constructor() {
       this.gameType = 'TicTacToe';
       this.minPlayers = 2;
-      this.maxPlayers = 2;
+      this.maxPlayers = 4;
       this.isStarted = false;
               
       this.board = [
@@ -11,8 +11,59 @@ class TicTacToe {
         ['', '', '']
       ];
 
-      this.teams = [];
+      this.teams = ['Blue', 'Red'];
+      this.teamsTally = {}; this.setupTeamsTally(); // { teamName: numOfTeamMembers [,... teamName: numOfTeamMembers] }
       this.turn;
+    }
+
+    setupTeamsTally() {
+      for (let i = 0; i < this.teams.length; i++) {
+        this.teamsTally[this.teams[i]] = 0;
+      }
+      // console.log(this)  // 'This' scoping gets messed up with for each? https://stackoverflow.com/questions/45175605/how-to-call-this-inside-for-example-foreach-in-class
+      // this.teams.forEach(function(team) {
+      //   console.log(this)
+      //   this.teamsTally[team] = 0;
+      // });
+    }
+
+    assignTeam() {
+      /* Assign team */
+
+      let teamName = Math.random() < 0.5 ? this.teams[0] : this.teams[1];
+
+      /* Tally assigned teams */
+      this.teamsTally[teamName] += 1;
+
+      return teamName;
+    }
+
+    joinTeam(teamName) {
+      this.teamsTally[teamName] += 1;
+    }
+
+    leaveTeam(teamName) {
+      this.teamsTally[teamName] -= 1;
+    }
+
+    canJoin() {
+      let canJoin = true;
+      
+      return canJoin;
+    }
+
+    canStart() {
+      let canStart = false;
+
+      /* Check to make sure each team has players */
+      let allTeamsHavePlayers = true;
+      for (const [team, numOfPlayers] of Object.entries(this.teamsTally)) {
+        if (numOfPlayers === 0) { allTeamsHavePlayers = false; }
+      }
+
+      if (allTeamsHavePlayers) { canStart = true; }
+      
+      return canStart;
     }
   
     startGame() {
@@ -41,7 +92,7 @@ class TicTacToe {
       return null;
     }
 
-    setPiece(team, coords) {
+    placePiece(team, coords) {
       if (this.turn != team) { return; }
       if (this.board[coords[0]][coords[1]] != '') { return; }
 

@@ -5,6 +5,8 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import socketIOClient from 'socket.io-client';  // https://socket.io/docs/v4/client-api/
 
+
+
 window.sequenceApp = {};
 
 function detectMobile() {
@@ -15,18 +17,28 @@ window.sequenceApp.isMobile = detectMobile();
 let HOST = window.location.origin.replace(/^http/,'ws');
 window.socket = socketIOClient(HOST);
 window.socket.on("connect", () => {
-  if (window.sessionStorage.getItem('teamName') === null) { window.sessionStorage.setItem('teamName', window.socket.id) }
+  // if (window.sessionStorage.getItem('teamName') === null) { window.sessionStorage.setItem('teamName', window.socket.id) }
   reconnect();
 });
 function reconnect() {
+  let roomName = window.sessionStorage.getItem('roomName');
   let teamName = window.sessionStorage.getItem('teamName');
-  let room = window.sessionStorage.getItem('roomName');
-  if (room === null) { return; }
-  window.socket.emit('joinGame', room, teamName, (roomJoined) => {
-    if (roomJoined === undefined) { window.sessionStorage.removeItem('roomName'); }
+
+  if (roomName === null || teamName === null) {
+    window.sessionStorage.removeItem('roomName');
+    window.sessionStorage.removeItem('teamName');
+    return;
+  }
+
+  window.socket.emit('joinGame', roomName, (roomJoined, teamJoined) => {
+    if (roomJoined === null) { window.sessionStorage.removeItem('roomName'); }
+    if (teamJoined === null) { window.sessionStorage.removeItem('teamName'); }
   });
+
   window.socket.emit('updateLobbies');
 }
+
+
 
 ReactDOM.render(
   <React.StrictMode>

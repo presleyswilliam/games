@@ -35,43 +35,13 @@ app.use(express.json({}));
 
 
 
-/*** SocketIO Variables ***/
-var activeGames = {}; // { lobbyName: { game: <game>, gameNumJoined: <gameNumJoined>, gameCapacity: <gameCapacity> } [,...{}] }
-var abandonedGames = {}; // { lobbyName: { game: <game>, gameNumJoined: <gameNumJoined>, gameCapacity: <gameCapacity> } [,...{}] }
+/*** Game Variables ***/
+var activeGames = {}; // { lobbyName: { game: <game>, [,... otherGameInfo]} [,...{}] }
+var abandonedGames = {}; // { lobbyName: { game: <game>, [,... otherGameInfo]} [,...{}] }
 
 
 
-/*** SocketIO Functions ***/
-function moveGameToActive(key) {
-  if (!Object.hasOwn(abandonedGames, key)) { return; }
-  clearTimeout(abandonedGames[key]['timeoutRef']);
-  delete abandonedGames[key]['timeoutRef'];
-  console.log('cleared timeout')
-  // activeGames[key] = structuredClone(abandonedGames[key]);
-  activeGames[key] = JSON.parse(JSON.stringify((abandonedGames[key])));
-  activeGames[key]['game'] = abandonedGames[key]['game']; // class obj doesn't get copied properly with functions
-  delete abandonedGames[key];
-}
-function moveGameToAbandoned(key) {
-  if (!Object.hasOwn(activeGames, key)) { return; }
-  // abandonedGames[key] = structuredClone(activeGames[key]);
-  abandonedGames[key] = JSON.parse(JSON.stringify((activeGames[key])));
-  abandonedGames[key]['game'] = activeGames[key]['game']; // class obj doesn't get copied properly with functions
-  abandonedGames[key]['timeoutRef'] = setTimeout(() => {
-    console.log('deleted')
-    delete abandonedGames[key];
-  }, 300000);  // 300000: 5min, 10000: 10sec
-  delete activeGames[key];
-}
-function abondonEmptyLobbies() {
-  let lobbyNames = ioGetAllRoomNames();
-  for (const [key, value] of Object.entries(activeGames)) {
-    if (lobbyNames.includes(key) === false) {
-      moveGameToAbandoned(key);
-    }
-  }
-}
-
+/*** Basic SocketIO Functions ***/
 function ioGetAllRoomNames() {
   // Convert map into 2D list:
   // ==> [['4ziBKG9XFS06NdtVAAAH', Set(1)], ['room1', Set(2)], ...]
@@ -85,10 +55,75 @@ function ioGetAllRoomNames() {
   return rooms;
 }
 
+function getClientsInRoom(roomName) {
+  let clientsInRoomSet = io.sockets.adapter.rooms.get(roomName);  // Returns a Set() data type
+  let clientsInRoomArr = clientsInRoomSet === undefined ? [] : Array.from(clientsInRoomSet);
+  return clientsInRoomArr;
+}
+
 function getSocketRooms(socket) {
   const arr = Array.from(socket.rooms);
   const filtered = arr.filter(room => room !== socket.id);
   return filtered;
+}
+
+function socketLeaveAllRooms(socket) {
+  getSocketRooms(socket).forEach( (roomName) => { leaveGame(socket, roomName) } );
+  abondonEmptyLobbies();
+}
+
+
+
+/*** Basic Game Functions ***/
+function moveGameToActive(key) {
+  /* If game is not abandoned, return */
+  if (!Object.hasOwn(abandonedGames, key)) { return; }
+
+  /* Prevent game from deleting */
+  clearTimeout(abandonedGames[key]['timeoutRef']);
+  delete abandonedGames[key]['timeoutRef'];
+  // console.log(`Cleared timeout for room: ${key}`)
+  
+  /* Copy game to active list */
+  activeGames[key] = JSON.parse(JSON.stringify((abandonedGames[key]))); // structuredClone() not supported on Heroku nodejs --- activeGames[key] = structuredClone(abandonedGames[key]);
+  activeGames[key]['game'] = abandonedGames[key]['game']; // Game object doesn't get copied properly
+
+  /* Remove game from abandoned list */
+  delete abandonedGames[key];
+}
+function moveGameToAbandoned(key) {
+  /* If game is not active, return */
+  if (!Object.hasOwn(activeGames, key)) { return; }
+
+  /* Copy game to abandoned list */
+  abandonedGames[key] = JSON.parse(JSON.stringify((activeGames[key]))); // structuredClone() not supported on Heroku nodejs --- abandonedGames[key] = structuredClone(activeGames[key]);
+  abandonedGames[key]['game'] = activeGames[key]['game']; // Game object doesn't get copied properly
+
+  /* Set timer to delete game for inactivity */
+  abandonedGames[key]['timeoutRef'] = setTimeout(() => {
+    delete abandonedGames[key];
+    // console.log(`Deleted room: ${key}`)
+  }, 300000);  // Time in ms --- 300000: 5min, 10000: 10sec
+
+  /* Remove game from active list */
+  delete activeGames[key];
+}
+
+function abondonEmptyLobbies() {
+  /* Get all socketIO rooms */
+  let lobbyNames = ioGetAllRoomNames();
+  
+  /* Remove games from active list that don't have socketIO rooms */
+  for (const [key, value] of Object.entries(activeGames)) { // Iterating through activeGames[roomName] object
+    if (lobbyNames.includes(key) === false) { moveGameToAbandoned(key); }
+  }
+}
+
+
+function deleteRoom(roomName) {
+  delete activeGames[roomName];
+  delete abandonedGames[roomName];
+  console.log(`Deleted room: ${roomName}`)
 }
 
 function getNumJoined(roomName) {
@@ -97,16 +132,15 @@ function getNumJoined(roomName) {
   return numJoined;
 }
 
-function getActiveLobbies(socket, clientCallback) {
-  /* Update numJoined */
-  for (const [key, value] of Object.entries(activeGames)) {
-    activeGames[key]['numJoined'] = getNumJoined(key);
-  }
-  
+function getActiveLobbies(socket, clientCallback) {  
   /* Get info from activeGames object */
   let modifiedActiveGames = {};
   let socketRooms = getSocketRooms(socket);
   for (const [key, value] of Object.entries(activeGames)) {
+    /* Update numJoined */
+    activeGames[key]['numJoined'] = getNumJoined(key);
+
+
     /* name */
     modifiedActiveGames[key] = {};
 
@@ -119,115 +153,175 @@ function getActiveLobbies(socket, clientCallback) {
     /* numJoined */
     modifiedActiveGames[key]['numJoined'] = activeGames[key]['numJoined'];
 
-    /* Min and Max Players */
-    modifiedActiveGames[key]['minPlayers'] = activeGames[key]['game'].minPlayers;
-    modifiedActiveGames[key]['maxPlayers'] = activeGames[key]['game'].maxPlayers;
+    /* teamsTally */
+    modifiedActiveGames[key]['teamsTally'] = JSON.parse(JSON.stringify(activeGames[key]['game'].teamsTally));
 
-    /* joined flag */
-    let joined = false;
-    if (socketRooms.includes(key)) { joined = true; }
-    modifiedActiveGames[key]['joined'] = joined;
+    /* canStart */
+    let canStart = activeGames[key]['game'].canStart(numJoined);
+    modifiedActiveGames[key]['canStart'] = canStart;
+
+    /* canJoin */
+    let canJoin = activeGames[key]['game'].canJoin(numJoined);
+    modifiedActiveGames[key]['canJoin'] = canJoin;
+
+    /* isJoined flag */
+    let isJoined = false;
+    if (socketRooms.includes(key)) { isJoined = true; }
+    modifiedActiveGames[key]['isJoined'] = isJoined;
   }
 
   /* Send back to client */
   clientCallback(modifiedActiveGames);
 }
 
-function newGame(socket, gameType, newRoomName, teamName, clientCallback) {
-  /* Leave current lobby if already in one */
-  getSocketRooms(socket).forEach( (room) => { socket.leave(room); } );
-  abondonEmptyLobbies();
+function newGame(socket, gameType, newRoomName, clientCallback) {
+  /* Error out if game already exists */
+  let err;
+  let existingRooms = ioGetAllRoomNames();
+  if (existingRooms.includes(newRoomName)) { err = 'A game with that name already exists.'; clientCallback(null, null, err); return; }
+
+  /* Leave current lobbies if already in one */
+  socketLeaveAllRooms(socket);
 
   /* Create lobby */
   socket.join(newRoomName);
 
-  /* Update object of room names and active games */
+  /* Create new game */
   if (gameType === 'Sequence') {
     activeGames[newRoomName] = { game: new Sequence };
   } else if (gameType === 'TicTacToe') {
     activeGames[newRoomName] = { game: new TicTacToe };
   }
 
+  /* Assign team for callback */
+  let teamName = activeGames[newRoomName]['game'].assignTeam();
+
   /* Add numJoined to object */
   activeGames[newRoomName]['numJoined'] = getNumJoined(newRoomName);
-
-  /* Push socket team to game */
-  activeGames[newRoomName]['game'].teams.push(teamName);
 
   /* Update lobbies on everyone's screen */
   io.emit('updateLobbies');
 
-  clientCallback(newRoomName);
+  clientCallback(newRoomName, teamName, err);
 }
 
-function joinGame(socket, roomName, teamName, clientCallback) {
+function joinGame(socket, roomName, clientCallback) {
+  /* Error out if game doesn't exists */
+  let err;
+  let inActiveGamesList = Object.hasOwn(activeGames, roomName);
+  let inAbandonedGamesList = Object.hasOwn(abandonedGames, roomName);
+  if (!inActiveGamesList && !inAbandonedGamesList) { err = 'Unable to join game. There are no games with that name.'; clientCallback(null, null, err); return; }
+
+  /* Leave current lobbies if already in one */
+  socketLeaveAllRooms(socket);
+
   /* Join lobby */
-  if (Object.hasOwn(activeGames, roomName) || Object.hasOwn(abandonedGames, roomName)) {
-    /* Leave current lobby if already in one */
-    getSocketRooms(socket).forEach( function(room) {
-      socket.leave(room);
+  socket.join(roomName);
 
-      /* Remove team from game when leaving */
-      let indexOfTeam = activeGames[room]['game'].teams.findIndex( (el) => el === teamName);
-      activeGames[room]['game'].teams.splice(indexOfTeam, 1);
-    });
-    abondonEmptyLobbies();
+  /* Brings back expired game if on recently abandoned */
+  moveGameToActive(roomName);
 
-    /* Join lobby */
-    socket.join(roomName);
-
-    /* Brings back expired game if on recently abandoned */
-    moveGameToActive(roomName);
-
-    /* Push socket team to game */
-    if (!activeGames[roomName]['game'].teams.includes(teamName)) { activeGames[roomName]['game'].teams.push(teamName); }
-    
-    /* Update lobbies on everyone's screen */
-    io.emit('updateLobbies');
-    
-    clientCallback(roomName);
-  } else {
-    /* Return undefined if join unsucecssful */
-    clientCallback(undefined);
-  }
+  /* Assign team for callback */
+  let teamName = activeGames[roomName]['game'].assignTeam();
+  
+  /* Update lobbies on everyone's screen */
+  io.emit('updateLobbies');
+  
+  clientCallback(roomName, teamName, err);
 }
 
-function leaveGame(socket, roomName, teamName, clientCallback) {
-  /* Leave game */
-  socket.leave(roomName);
-
-  /* Remove team from game when leaving */
-  let indexOfTeam = activeGames[roomName]['game'].teams.findIndex( (el) => el === teamName);
-  activeGames[roomName]['game'].teams.splice(indexOfTeam, 1);
-
-  /* Delete from active games */
-  let room = io.sockets.adapter.rooms.get(roomName);
-  if (room === undefined) {
-    delete activeGames[roomName];
-  }
-
-  clientCallback(roomName);
-}
-
-function startGame(socket, gameType, roomName) {
+function startGame(socket, roomName) {
   activeGames[roomName]['game'].isStarted = true;
   activeGames[roomName]['game'].startGame();
+
+  let gameType = activeGames[roomName]['game'].gameType;
   io.to(roomName).emit('startingGame', gameType);
 }
 
+function leaveGame(socket, roomName, teamName) {
+  /* Leave game */
+  socket.leave(roomName);
+
+  /* Remove player from game's team object */
+  activeGames[roomName]['game'].leaveTeam(teamName);
+
+  /* Delete from active games IF no clients left */
+  let clientsInRoom = getClientsInRoom(roomName);
+  if (clientsInRoom.length === 0) { deleteRoom(roomName); }
+
+  io.emit('updateLobbies');
+}
+
+function joinTeam(socket, prevTeamName, newTeamName, clientCallback) {
+  /* Error out if in more than one game */
+  let err;
+  let socketGames = getSocketRooms(socket);
+  if (socketGames.length > 1) { err = 'Unable to join team. You have joined more than one game.'; clientCallback(null, err); return; }
+
+  let roomName = socketGames[0];
+
+  /* Error out if team doesn't exists */
+  let teamExists = activeGames[roomName]['game'].teams.includes(prevTeamName);
+  if (!teamExists) { err = 'Unable to join team. There are no teams with that name.'; clientCallback(null, err); return; }
+
+
+  /* Leave current team if already in one */
+  activeGames[roomName]['game'].leaveTeam(prevTeamName);
+
+  /* Join team */
+  activeGames[roomName]['game'].joinTeam(newTeamName);
+  
+  /* Update lobbies on everyone's screen */
+  io.emit('updateLobbies');
+  
+  clientCallback(newTeamName, err);
+}
+
+
+
+/*** TicTacToe Functions ***/
 function getGameBoard(socket, roomName, clientCallback) {
-  let gameboard = activeGames?.[roomName]?.['game']?.board;
+  let gameboard = activeGames[roomName]['game'].board;
+
   let winner = activeGames[roomName]['game'].checkWin();
 
   clientCallback(gameboard, winner);
 }
 
-function setPiece(socket, roomName, teamName, coord, clientCallback) {
-  // if checks for turn and valid placement are OK
-  activeGames[roomName]['game'].setPiece(teamName, coord);
+function placePiece(socket, roomName, teamName, coord) {
+  activeGames[roomName]['game'].placePiece(teamName, coord);
 
   io.emit('updateGameboard');
 }
+
+
+
+/*** SocketIO Logic ***/
+io.on('connection', (socket) => {
+  console.log(`Client ${socket.id} connected.`);
+
+
+  /*** Basic Game Functions ***/
+  socket.on('getActiveLobbies', (clientCallback) => { getActiveLobbies(socket, clientCallback); });
+  socket.on('updateLobbies', (clientCallback) => { io.emit('updateLobbies'); });
+  socket.on('newGame', (gameType, roomName, clientCallback) => { newGame(socket, gameType, roomName, clientCallback); });
+  socket.on('joinGame', (roomName, clientCallback) => { joinGame(socket, roomName, clientCallback); });
+  socket.on('joinTeam', (prevTeamName, newTeamName, clientCallback) => { joinTeam(socket, prevTeamName, newTeamName, clientCallback); });
+  socket.on('leaveGame', (roomName, teamName) => { leaveGame(socket, roomName, teamName); });
+  socket.on('startGame', (roomName) => { startGame(socket, roomName)} );
+  // io.emit('updateLobbies');
+  // io.to(roomName).emit('startingGame', gameType);
+
+
+  /*** TicTacToe Functions ***/
+  socket.on('getGameBoard', (roomName, clientCallback) => { getGameBoard(socket, roomName, clientCallback)} );
+  socket.on('placePiece', (roomName, teamName, coord) => { placePiece(socket, roomName, teamName, coord)} );
+  // io.emit('updateGameboard');
+
+
+  /*** SocketIO Disconnect Logic ***/
+  socket.on('disconnect', () => { handleDisconnect(socket); }); // this may need to be a custom event so I can control when it's called
+});
 
 function handleDisconnect(socket) {
   abondonEmptyLobbies();
@@ -235,24 +329,6 @@ function handleDisconnect(socket) {
 
   console.log(`Client ${socket.id} disconnected.`)
 }
-
-/*** SocketIO Logic ***/
-io.on('connection', (socket) => {
-  console.log(`Client ${socket.id} connected.`);
-  
-  socket.on("getActiveLobbies", (clientCallback) => { getActiveLobbies(socket, clientCallback); });
-  socket.on("updateLobbies", (clientCallback) => { io.emit('updateLobbies'); });
-  socket.on("newGame", (gameType, roomName, teamName, clientCallback) => { newGame(socket, gameType, roomName, teamName, clientCallback); });
-  socket.on("joinGame", (roomName, teamName, clientCallback) => { joinGame(socket, roomName, teamName, clientCallback); });
-  socket.on("leaveGame", (roomName, teamName, clientCallback) => { leaveGame(socket, roomName, teamName, clientCallback); });
-  socket.on("startGame", (gameType, roomName, clientCallback) => { startGame(socket, gameType, roomName)} );
-
-  socket.on("getGameBoard", (roomName, clientCallback) => { getGameBoard(socket, roomName, clientCallback)} );
-
-  socket.on("setPiece", (roomName, teamName, coord, clientCallback) => { setPiece(socket, roomName, teamName, coord, clientCallback)} );
-  
-  socket.on('disconnect', () => { handleDisconnect(socket); }); // this may need to be a custom event so I can control when it's called
-});
 
 
 /*** GENERAL FUNCTIONS ***/

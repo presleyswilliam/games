@@ -35,18 +35,20 @@ useEffect(() => {
 function placePiece(rowIndex, colIndex) {
     let teamName = window.sessionStorage.getItem('teamName');
     let roomName = window.sessionStorage.getItem('roomName');
+
     let coord = [rowIndex, colIndex];
-    window.socket.emit('setPiece', roomName, teamName, coord, (response) => {
-        // console.log(response)
-    })
+
+    window.socket.emit('placePiece', roomName, teamName, coord);
 }
 
 function returnToLobbies() {
-    let teamName = window.sessionStorage.getItem('teamName');
     let roomName = window.sessionStorage.getItem('roomName');
-    window.socket.emit('leaveGame', roomName, teamName, (response) => {
-        // console.log(response)
-    })
+    let teamName = window.sessionStorage.getItem('teamName');
+    window.socket.emit('leaveGame', roomName, teamName);
+
+    window.sessionStorage.removeItem('roomName');
+    window.sessionStorage.removeItem('teamName');
+
     props.setGameName('');
 }
 

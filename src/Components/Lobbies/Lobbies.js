@@ -6,14 +6,19 @@ import { Box } from "@mui/material";
 export default function Lobbies (props) {
 /* API */
     function getLobbies() {
-        window.socket.emit('getActiveLobbies', (lobbies) => {  // response is: { lobbyName0: { gameType0: <gameType0>, gameNumJoined0: <gameNumJoined0>, gameCapacity0: <gameCapacity0> } [,...{}] }
+        window.socket.emit('getActiveLobbies', (lobbies) => {
             setLobbies(lobbies);
-            console.log(lobbies)
         })
     }
     
 /* Variables */
     const [lobbies, setLobbies] = useState({});
+
+    let gameType;
+    let teamsTally;
+    let canJoin;
+    let canStart;
+    let isJoined;
 
     
 /* Functions */
@@ -30,14 +35,21 @@ export default function Lobbies (props) {
 
 /* JSX */
     let lobbiesJSX;
-    let lobbyCards;
-    lobbyCards = 
+    let lobbyCardsJSX;
+    lobbyCardsJSX = 
     Object.keys(lobbies).map(function(lobbyNameKey, index) {
-        if (lobbies[lobbyNameKey]['joined'] && lobbies[lobbyNameKey]['isStarted']) { props.setGameName(lobbies[lobbyNameKey]['gameType']) } else if (lobbies[lobbyNameKey]['isStarted'] === true) { return; }
-        return <ActiveGameCard name={lobbyNameKey} gameType={lobbies[lobbyNameKey]['gameType']} maxPlayers={lobbies[lobbyNameKey]['maxPlayers']} canJoin={lobbies[lobbyNameKey]['numJoined'] < lobbies[lobbyNameKey]['maxPlayers']} canStart={lobbies[lobbyNameKey]['numJoined'] >= lobbies[lobbyNameKey]['minPlayers'] && lobbies[lobbyNameKey]['numJoined'] <= lobbies[lobbyNameKey]['maxPlayers']} numJoined={lobbies[lobbyNameKey]['numJoined']} joined={lobbies[lobbyNameKey]['joined']}/>
+        if (lobbies[lobbyNameKey]['isJoined'] && lobbies[lobbyNameKey]['isStarted']) { props.setGameName(lobbies[lobbyNameKey]['gameType']) } else if (lobbies[lobbyNameKey]['isStarted'] === true) { return; }
+
+        gameType = lobbies[lobbyNameKey]['gameType'];
+        teamsTally = lobbies[lobbyNameKey]['teamsTally'];
+        canJoin = lobbies[lobbyNameKey]['canJoin'];
+        canStart = lobbies[lobbyNameKey]['canStart'];
+        isJoined = lobbies[lobbyNameKey]['isJoined'];
+
+        return <ActiveGameCard roomName={lobbyNameKey} gameType={gameType} teamsTally={teamsTally} canJoin={canJoin} canStart={canStart} isJoined={isJoined}/>;
     });
 
-    lobbiesJSX = <Box sx={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.paper', borderRadius: 1 }}>{lobbyCards}<CreateNewGame /></Box>;
+    lobbiesJSX = <Box sx={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.paper', borderRadius: 1 }}>{lobbyCardsJSX}<CreateNewGame /></Box>;
 
     return (
         <React.Fragment>

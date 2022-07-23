@@ -4,9 +4,11 @@ import { Button, Card, CardActions, MenuItem, Select, TextField } from "@mui/mat
 export default function CreateNewGame (props) {
 /* API */
     function newGame(roomName, gameType) {
-        let teamName = window.sessionStorage.getItem('teamName');
-        window.socket.emit('newGame', gameType, roomName, teamName, (newRoomName) => {
-            window.sessionStorage.setItem('roomName', roomName);
+        window.socket.emit('newGame', gameType, roomName, (newRoomName, newTeamName, err) => {
+            if (err !== null) { alert(err); return; }
+
+            window.sessionStorage.setItem('roomName', newRoomName);
+            window.sessionStorage.setItem('teamName', newTeamName);
         })
     }
     
