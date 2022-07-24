@@ -28,8 +28,6 @@ class Sequence {
       ];
 
       this.turn;
-  
-      this.startGame();
     }
 
     shuffle1DArray(array) {
@@ -53,6 +51,39 @@ class Sequence {
                     'J_twoEyed', 'J_twoEyed', 'J_twoEyed', 'J_twoEyed', 'J_oneEyed', 'J_oneEyed', 'J_oneEyed', 'J_oneEyed'];
       
       this.shuffle1DArray(this.deck);
+    }
+
+    checkForSequence(color, placedVal, crownedVal) {
+      let directions = [[0,1], [1,1], [1,0], [1,-1]];
+      for (let d = 0; d < directions.length; d++) {
+        let dRow = directions[d][0];
+        let dCol = directions[d][1];
+        for (let i = 0; i < boardState.length; i++) {
+          for (let j = 0; j < boardState[i].length; j++) {
+            let lastRow = i + 4*dRow;
+            let lastCol = j + 4*dCol;
+            if (0 <= lastRow && lastRow <= 9 && 0 <= lastCol && lastCol <= 9) {
+              let current = boardState[i][j];
+              if (current == placedVal && current == boardState[i + dRow][j + dCol] && current == boardState[i + (2*dRow)][j + (2*dCol)] && current == boardState[i + (3*dRow)][j + (3*dCol)] && current == boardState[lastRow][lastCol]) {
+                boardState[i][j] = crownedVal;
+                boardState[i + dRow][j + dCol] = crownedVal;
+                boardState[i + (2*dRow)][j + (2*dCol)] = crownedVal;
+                boardState[i + (3*dRow)][j + (3*dCol)] = crownedVal;
+                boardState[lastRow][lastCol] = crownedVal;
+    
+                if (color == "blue") {
+                  blueScore = blueScore + 1;
+                } else if (color == "red") {
+                  redScore = redScore + 1;
+                }
+    
+              }
+            }
+    
+          } //end inner for
+        } //end outer for
+      } //end direction
+    
     }
   
 }

@@ -3,17 +3,27 @@ import { Box, Button, Card, CardActions, CardContent, Typography } from "@mui/ma
 
 export default function ActiveGameCard (props) {
 /* API */
-function startGame(roomName) {
+function startGame() {
+    let roomName = window.sessionStorage.getItem('roomName');
     window.socket.emit('startGame', roomName);
 }
 
 function joinGame(roomName) {
-    window.socket.emit('joinGame', roomName, (roomName, teamName, err) => {
+    window.socket.emit('joinGame', roomName, null, (roomName, teamName, err) => {
         if (err !== null) { alert(err); return; }
 
         window.sessionStorage.setItem('roomName', roomName);
         window.sessionStorage.setItem('teamName', teamName);
     })
+}
+
+function leaveGame() {
+    let roomName = window.sessionStorage.getItem('roomName');
+    let teamName = window.sessionStorage.getItem('teamName');
+    window.socket.emit('leaveGame', roomName, teamName);
+
+    window.sessionStorage.removeItem('roomName');
+    window.sessionStorage.removeItem('teamName');
 }
 
 function joinTeam(newTeamName) {
@@ -32,7 +42,7 @@ function joinTeam(newTeamName) {
     let isJoined = props.isJoined;
     let canStart = props.canStart;
     let canJoin = props.canJoin;
-    let clientTeamName = window.sessionStorage.getItem('teamName');
+    let teamName = window.sessionStorage.getItem('teamName');
     let teamsTally = props.teamsTally;
 
     
@@ -44,8 +54,9 @@ function joinTeam(newTeamName) {
         backgroundColor: props.joined ? 'lightgreen' : 'lightgray'
     });
 
-    let buttonColorStyle = (teamName) => ({
-        backgroundColor: clientTeamName === teamName ? teamName : 'lightslategray',
+    let buttonColorStyle = (teamNameParam) => ({
+        backgroundColor: teamName === teamNameParam ? teamNameParam : 'lightslategray',
+        fontWeight: teamName === teamNameParam ? 'bold' : 'normal',
         color: 'white'
     });
 
@@ -54,19 +65,24 @@ function joinTeam(newTeamName) {
     let gameCardJSX;
 
     let teamsTallyJSX = 
-    Object.keys(teamsTally).map(function(teamName) {
-        let isDisabled = (!isJoined) || (clientTeamName === teamName);
+    Object.keys(teamsTally).map(function(teamNameParam) {
+        let isDisabled = (!isJoined) || (teamName === teamNameParam);
 
-        return <Button sx={{ margin: 0.5 }} variant='contained' size='small' disabled={isDisabled} style={{...buttonColorStyle(teamName)}} onClick={() => joinTeam(teamName)}>{teamName} {teamsTally[teamName]}</Button>;
+        return <Button sx={{ margin: 0.5 }} variant='contained' size='small' disabled={isDisabled} style={{...buttonColorStyle(teamNameParam)}} onClick={() => joinTeam(teamNameParam)}>{teamNameParam} {teamsTally[teamNameParam]}</Button>;
     });
 
     let teamsRow = <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center' }}>{teamsTallyJSX}</Box>
 
-    let startJoinButtonJSX;
+    let gameActionButtonsRowJSX;
     if (isJoined) {
-        startJoinButtonJSX = <Button variant='contained' size='small' disabled={!canStart} onClick={() => startGame(roomName)}>Start</Button>;
+        gameActionButtonsRowJSX = (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center' }}>
+                <Button sx={{ backgroundColor: 'lightslategray', margin: 0.5 }}  variant='contained' size='small' onClick={() => leaveGame()}>Leave</Button>
+                <Button sx={{ margin: 0.5 }}  variant='contained' size='small' disabled={!canStart} onClick={() => startGame()}>Start</Button>
+            </Box>
+            );
     } else {
-        startJoinButtonJSX = <Button variant='contained' size='small' disabled={!canJoin} onClick={() => joinGame(roomName)}>Join</Button>;
+        gameActionButtonsRowJSX = <Button variant='contained' size='small' disabled={!canJoin} onClick={() => joinGame(roomName)}>Join</Button>;
     }
 
     gameCardJSX = (
@@ -77,7 +93,7 @@ function joinTeam(newTeamName) {
                 <Typography>{teamsRow}</Typography>
             </CardContent>
             <CardActions sx={{ justifyContent: 'center' }}>
-                <Typography>{startJoinButtonJSX}</Typography>
+                <Typography>{gameActionButtonsRowJSX}</Typography>
             </CardActions>
         </Card>
     );

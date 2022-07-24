@@ -205,7 +205,7 @@ function newGame(socket, gameType, newRoomName, clientCallback) {
   clientCallback(newRoomName, teamName, err);
 }
 
-function joinGame(socket, roomName, clientCallback) {
+function joinGame(socket, roomName, teamName, clientCallback) {
   /* Error out if game doesn't exists */
   let err;
   let inActiveGamesList = Object.hasOwn(activeGames, roomName);
@@ -222,12 +222,13 @@ function joinGame(socket, roomName, clientCallback) {
   moveGameToActive(roomName);
 
   /* Assign team for callback */
-  let teamName = activeGames[roomName]['game'].assignTeam();
+  let newTeamName;
+  if (teamName === null) { newTeamName = activeGames[roomName]['game'].assignTeam(); } else { newTeamName = teamName; }
   
   /* Update lobbies on everyone's screen */
   io.emit('updateLobbies');
   
-  clientCallback(roomName, teamName, err);
+  clientCallback(roomName, newTeamName, err);
 }
 
 function startGame(socket, roomName) {
@@ -305,7 +306,7 @@ io.on('connection', (socket) => {
   socket.on('getActiveLobbies', (clientCallback) => { getActiveLobbies(socket, clientCallback); });
   socket.on('updateLobbies', (clientCallback) => { io.emit('updateLobbies'); });
   socket.on('newGame', (gameType, roomName, clientCallback) => { newGame(socket, gameType, roomName, clientCallback); });
-  socket.on('joinGame', (roomName, clientCallback) => { joinGame(socket, roomName, clientCallback); });
+  socket.on('joinGame', (roomName, teamName, clientCallback) => { joinGame(socket, roomName, teamName, clientCallback); });
   socket.on('joinTeam', (prevTeamName, newTeamName, clientCallback) => { joinTeam(socket, prevTeamName, newTeamName, clientCallback); });
   socket.on('leaveGame', (roomName, teamName) => { leaveGame(socket, roomName, teamName); });
   socket.on('startGame', (roomName) => { startGame(socket, roomName)} );

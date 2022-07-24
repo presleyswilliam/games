@@ -30,7 +30,7 @@ function reconnect() {
     return;
   }
 
-  window.socket.emit('joinGame', roomName, (roomJoined, teamJoined) => {
+  window.socket.emit('joinGame', roomName, teamName, (roomJoined, teamJoined) => {
     if (roomJoined === null) { window.sessionStorage.removeItem('roomName'); }
     if (teamJoined === null) { window.sessionStorage.removeItem('teamName'); }
   });
