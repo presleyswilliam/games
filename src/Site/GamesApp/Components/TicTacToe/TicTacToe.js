@@ -15,12 +15,12 @@ export default function TicTacToe (props) {
 
 
 /* JSX */
-    let tttJSX;
-    tttJSX = <Gameboard setGameName={props.setGameName} />;
+    let ticTacToeJSX;
+    ticTacToeJSX = <Gameboard setGameName={props.setGameName} />;
 
     return (
         <React.Fragment>
-            {tttJSX}
+            {ticTacToeJSX}
         </React.Fragment>
     );
 }
