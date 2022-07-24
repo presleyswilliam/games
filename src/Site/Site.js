@@ -32,20 +32,17 @@ export default function Site (props) {
 
 
 /* JSX */
-    let componentTEMPLATEJSX;
-    componentTEMPLATEJSX = <GamesApp />;
+    // let componentTEMPLATEJSX;
+    // componentTEMPLATEJSX = <GamesApp />;
 
     return (
         <BrowserRouter>
             <Routes>
                 {/* <Route path='/' element={<div>Index</div>} /> */}
-                <Route path="/games" element={componentTEMPLATEJSX} />
+                <Route path="/games" element={<GamesApp />} />
                 {/* <Route path="/games/test" element={<div>/games/test</div>} /> */}
                 {/* <Route path="*" element={<div>Catch All</div>} /> */}
             </Routes>
         </BrowserRouter>
-        // <React.Fragment>
-        //     {componentTEMPLATEJSX}
-        // </React.Fragment>
     );
 }
