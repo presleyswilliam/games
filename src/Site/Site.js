@@ -21,7 +21,7 @@ export default function Site (props) {
                 {/* <Route path='/' element={<div>Index</div>} /> */}
                 <Route path="/games" element={<GamesApp />} />
                 {/* <Route path="/games/test" element={<div>/games/test</div>} /> */}
-                {/* <Route path="*" element={<GamesApp />} /> */}
+                <Route path="*" element={<GamesApp />} />
             </Routes>
         </BrowserRouter>
     );
