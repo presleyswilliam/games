@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Link, Routes, Route } from 'react-router-dom'
+import { Link, Routes, Route, useLocation } from 'react-router-dom';
 import GamesApp from './GamesApp/GamesApp';
 
 
@@ -15,17 +15,49 @@ export default function Site (props) {
     
 
 /* Variables */
-    // const [variable, setVariable] = useState('initialState');
-    // const [intervalRef, setIntervalRef] = useState();
-
-    // useEffect(() => {
-    //     setIntervalRef(setInterval(functionName, 1000));
-
-    //     return clearInterval(intervalRef);  // Teardown function
-    // }, []); // Initializes because of empty array dependency
+    const location = useLocation();
 
 
 /* Functions */
+    useEffect(() => {
+        updateManifestJson();
+
+        return;  // Teardown function
+    }, [location]); // Only runs on change of location
+
+  function updateManifestJson() {
+    var myDynamicManifest = {
+      "short_name": "PSW Games",
+      "name": "PSW Games",
+      "icons": [
+        {
+          "src": "favicon.ico",
+          "sizes": "64x64 32x32 24x24 16x16",
+          "type": "image/x-icon"
+        },
+        {
+          "src": "logo192.png",
+          "type": "image/png",
+          "sizes": "192x192"
+        },
+        {
+          "src": "logo512.png",
+          "type": "image/png",
+          "sizes": "512x512"
+        }
+      ],
+      "start_url": "." + window.location.pathname,
+      "scope": "." + window.location.pathname,
+      "display": "standalone",
+      "theme_color": "#ffffff",
+      "background_color": "#ffffff"
+    }
+    
+    const stringManifest = JSON.stringify(myDynamicManifest);
+    const blob = new Blob([stringManifest], {type: 'application/json'});
+    const manifestURL = URL.createObjectURL(blob);
+    document.querySelector('#dynamic-manifest').setAttribute('href', manifestURL);
+  }
 
 
 /* CSS Classes */
@@ -36,13 +68,11 @@ export default function Site (props) {
     // componentTEMPLATEJSX = <GamesApp />;
 
     return (
-        <BrowserRouter>
-            <Routes>
-                {/* <Route path='/' element={<div>Index</div>} /> */}
-                <Route path="/games" element={<GamesApp />} />
-                {/* <Route path="/games/test" element={<div>/games/test</div>} /> */}
-                {/* <Route path="*" element={<div>Catch All</div>} /> */}
-            </Routes>
-        </BrowserRouter>
+        <Routes>
+            {/* <Route path='/' element={<div>Index</div>} /> */}
+            <Route path="/games" element={<GamesApp />} />
+            {/* <Route path="/games/test" element={<div>/games/test</div>} /> */}
+            {/* <Route path="*" element={<div>Catch All</div>} /> */}
+        </Routes>
     );
 }
