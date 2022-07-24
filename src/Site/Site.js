@@ -46,8 +46,8 @@ export default function Site (props) {
           "sizes": "512x512"
         }
       ],
-      "start_url": "." + window.location.pathname,
-      "scope": "." + window.location.pathname,
+      "start_url": window.location.href,
+      "scope": window.location.href,
       "display": "standalone",
       "theme_color": "#ffffff",
       "background_color": "#ffffff"
