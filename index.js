@@ -36,6 +36,7 @@ app.use(express.json({}));
 
 
 /*** Game Variables ***/
+// const ioGamesNamespace = io.of('/games');
 var activeGames = {}; // { lobbyName: { game: <game>, [,... otherGameInfo]} [,...{}] }
 var abandonedGames = {}; // { lobbyName: { game: <game>, [,... otherGameInfo]} [,...{}] }
 
@@ -221,7 +222,7 @@ function joinGame(socket, roomName, teamName, clientCallback) {
   /* Brings back expired game if on recently abandoned */
   moveGameToActive(roomName);
 
-  /* Assign team for callback */
+  /* Assign team for callback if not reconnecting */
   let newTeamName;
   if (teamName === null) { newTeamName = activeGames[roomName]['game'].assignTeam(); } else { newTeamName = teamName; }
   

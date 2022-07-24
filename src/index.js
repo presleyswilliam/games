@@ -15,6 +15,8 @@ function detectMobile() {
 window.sequenceApp.isMobile = detectMobile();
 
 let HOST = window.location.origin.replace(/^http/,'ws');
+// let namespace = '/games';
+// let url = HOST + namespace;
 window.socket = socketIOClient(HOST);
 window.socket.on("connect", () => {
   // if (window.sessionStorage.getItem('teamName') === null) { window.sessionStorage.setItem('teamName', window.socket.id) }
