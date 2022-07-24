@@ -5,9 +5,7 @@ import Site from './Site/Site';
 function App() {
   return (
     <div className="App">
-      <BrowserRouter>
-        <Site />
-      </BrowserRouter>
+      <Site />
     </div>
   );
 }
