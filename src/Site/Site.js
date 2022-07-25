@@ -16,9 +16,9 @@ export default function Site (props) {
 /* Functions */
 
     return (
-      <BrowserRouter>
-        <Routes>
-                {/* <Route path='/' element={<div>Index</div>} /> */}
+        <BrowserRouter>
+            <Routes>
+                {/* <Route path='/' element={<Link to='/games'>Games</Link>} /> */}
                 <Route path="/games" element={<GamesApp />} />
                 {/* <Route path="/games/test" element={<div>/games/test</div>} /> */}
                 <Route path="*" element={<GamesApp />} />

@@ -61,7 +61,7 @@ export default function CreateNewGame (props) {
                     <TextField variant='outlined' sx={{ width: 8/10 }} size='small' label='New Lobby Name' onInput={e => setNewLobbyName(e.target.value)} />
                     <TextField variant='outlined' sx={{ width: 8/10, margin: 1 }} size='small' label='- Select Game -' value={newLobbyGameType} select onChange={e => setNewGameType(e.target.value)}>
                         <MenuItem value='TicTacToe'>TicTacToe</MenuItem>
-                        <MenuItem value='Sequence' disabled>Sequence</MenuItem>
+                        <MenuItem value='Sequence'>Sequence</MenuItem>
                         <MenuItem value='ConnectFour' disabled>Connect Four</MenuItem>
                         <MenuItem value='Trash' disabled>Trash</MenuItem>
                     </TextField>

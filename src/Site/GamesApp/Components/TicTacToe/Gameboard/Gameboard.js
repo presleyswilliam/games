@@ -3,9 +3,9 @@ import { Box, Button, Card, CardActions, CardContent, Typography } from "@mui/ma
 
 export default function Gameboard (props) {
 /* API */
-function getGameBoard() {
+function getGameboard() {
     let roomName = window.sessionStorage.getItem('roomName');
-    window.socket.emit('getGameBoard', roomName, (gameboard, winner) => {
+    window.socket.emit('getGameboard', roomName, (gameboard, winner) => {
         setGameboard(gameboard);
         if (winner !== null) { setWinner(winner); }
     })
@@ -23,9 +23,9 @@ else if (winner !== null) { winnerText = 'You Lose :('; }
 
 /* Functions */
 useEffect(() => {
-    getGameBoard();
+    getGameboard();
 
-    window.socket.on('updateGameboard', () => { getGameBoard(); });
+    window.socket.on('updateGameboard', () => { getGameboard(); });
 
     return () => {  // Teardown function
         window.socket.off('updateGameboard');

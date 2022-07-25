@@ -14,7 +14,7 @@ class Sequence {
                     'black_joker','9_spades','8_spades','7_spades','6_spades','5_spades','4_spades','3_spades','2_spades','black_joker',
                     'J_twoEyed', 'J_twoEyed', 'J_twoEyed', 'J_twoEyed', 'J_oneEyed', 'J_oneEyed', 'J_oneEyed', 'J_oneEyed'];
               
-      this.board = [ // Blue Layout
+      this.boardLayout = [ // Blue Layout
         ['black_joker','6_diamonds','7_diamonds','8_diamonds','9_diamonds','10_diamonds','Q_diamonds','K_diamonds','A_diamonds','black_joker'],
         ['5_diamonds','3_hearts','2_hearts','2_spades','3_spades','4_spades','5_spades','6_spades','7_spades','A_clubs'],
         ['4_diamonds','4_hearts','K_diamonds','A_diamonds','A_clubs','K_clubs','Q_clubs','10_clubs','8_spades','K_clubs'],
@@ -27,7 +27,67 @@ class Sequence {
         ['black_joker','9_spades','8_spades','7_spades','6_spades','5_spades','4_spades','3_spades','2_spades','black_joker']
       ];
 
+      this.board = [
+        ['','','','','','','','','',''],
+        ['','','','','','','','','',''],
+        ['','','','','','','','','',''],
+        ['','','','','','','','','',''],
+        ['','','','','','','','','',''],
+        ['','','','','','','','','',''],
+        ['','','','','','','','','',''],
+        ['','','','','','','','','',''],
+        ['','','','','','','','','',''],
+        ['','','','','','','','','',''],
+      ];
+
+      this.teams = ['Blue', 'Red'];
+      this.teamsTally = {}; this.setupTeamsTally(); // { teamName: numOfTeamMembers [,... teamName: numOfTeamMembers] }
       this.turn;
+    }
+
+    setupTeamsTally() {
+      for (let i = 0; i < this.teams.length; i++) {
+        this.teamsTally[this.teams[i]] = 0;
+      }
+    }
+
+    assignTeam() {
+      /* Assign team */
+
+      let teamName = Math.random() < 0.5 ? this.teams[0] : this.teams[1];
+
+      /* Tally assigned teams */
+      this.teamsTally[teamName] += 1;
+
+      return teamName;
+    }
+
+    joinTeam(teamName) {
+      this.teamsTally[teamName] += 1;
+    }
+
+    leaveTeam(teamName) {
+      this.teamsTally[teamName] -= 1;
+    }
+
+    canJoin() {
+      let canJoin = true;
+      
+      return canJoin;
+    }
+
+    canStart() {
+      let canStart = false;
+
+      /* Check to make sure each team has players */
+      let allTeamsHavePlayers = true;
+      for (const [team, numOfPlayers] of Object.entries(this.teamsTally)) {
+        if (numOfPlayers === 0) { allTeamsHavePlayers = false; }
+      }
+
+      if (allTeamsHavePlayers) { canStart = true; }
+      
+      return canStart;
     }
 
     shuffle1DArray(array) {
@@ -53,7 +113,8 @@ class Sequence {
       this.shuffle1DArray(this.deck);
     }
 
-    checkForSequence(color, placedVal, crownedVal) {
+    checkWin(color, placedVal, crownedVal) {
+      return null;
       let directions = [[0,1], [1,1], [1,0], [1,-1]];
       for (let d = 0; d < directions.length; d++) {
         let dRow = directions[d][0];

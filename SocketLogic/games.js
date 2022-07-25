@@ -63,7 +63,7 @@ module.exports = (server) => {
 
 
 
-  /*** Basic Game Functions ***/
+  /*** Basic Lobby Functions ***/
   function moveGameToActive(key) {
     /* If game is not abandoned, return */
     if (!Object.hasOwn(abandonedGames, key)) { return; }
@@ -269,8 +269,14 @@ module.exports = (server) => {
 
 
 
-  /*** TicTacToe Functions ***/
-  function getGameBoard(socket, roomName, clientCallback) {
+  /*** Basic Game Functions ***/
+  function getGameboardLayout(socket, roomName, clientCallback) {
+    let gameboardLayout = activeGames[roomName]['game'].boardLayout;
+
+    clientCallback(gameboardLayout);
+  }
+
+  function getGameboard(socket, roomName, clientCallback) {
     let gameboard = activeGames[roomName]['game'].board;
 
     let winner = activeGames[roomName]['game'].checkWin();
@@ -291,7 +297,7 @@ module.exports = (server) => {
     console.log(`Client ${socket.id} connected.`);
 
 
-    /*** Basic Game Functions ***/
+    /*** Basic Lobby Functions ***/
     socket.on('getActiveLobbies', (clientCallback) => { getActiveLobbies(socket, clientCallback); });
     socket.on('updateLobbies', (clientCallback) => { io.emit('updateLobbies'); });
     socket.on('newGame', (gameType, roomName, clientCallback) => { newGame(socket, gameType, roomName, clientCallback); });
@@ -303,8 +309,9 @@ module.exports = (server) => {
     // io.to(roomName).emit('startingGame', gameType);
 
 
-    /*** TicTacToe Functions ***/
-    socket.on('getGameBoard', (roomName, clientCallback) => { getGameBoard(socket, roomName, clientCallback)} );
+    /*** Basic Game Functions ***/
+    socket.on('getGameboardLayout', (roomName, clientCallback) => { getGameboardLayout(socket, roomName, clientCallback)} );
+    socket.on('getGameboard', (roomName, clientCallback) => { getGameboard(socket, roomName, clientCallback)} );
     socket.on('placePiece', (roomName, teamName, coord) => { placePiece(socket, roomName, teamName, coord)} );
     // io.emit('updateGameboard');
 
