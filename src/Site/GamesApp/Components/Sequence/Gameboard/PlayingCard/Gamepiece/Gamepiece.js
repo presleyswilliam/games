@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import CircleIcon from '@mui/icons-material/Circle';
 
 export default function Gamepiece (props) {
 /* API */
@@ -14,12 +15,12 @@ export default function Gamepiece (props) {
 
 
 /* JSX */
-    let sequenceJSX;
-    sequenceJSX = <span>{props.boardValue}</span>;
+    let gamepieceJSX;
+    gamepieceJSX = <CircleIcon style={{ color: props.boardValue }} />;
 
     return (
         <React.Fragment>
-            {sequenceJSX}
+            {gamepieceJSX}
         </React.Fragment>
     );
 }

@@ -23,7 +23,7 @@ export default function PlayingCard (props) {
     } else if (suit === "diamonds") {
         suitUnicode = '\u{2666}';
     } else if (suit === "joker") {
-        suitUnicode = '\u{2638}';
+        suitUnicode = '\u{2657}';
     } else if (rank === "J") {
         if (suit === "oneEyed") {
             suitUnicode = '\u{2609}';
