@@ -46,6 +46,7 @@ export default function Gameboard (props) {
     }, []); // Initializes because of empty array dependency
     
     function placePiece(rowIndex, colIndex) {
+        console.log('here')
         let teamName = window.sessionStorage.getItem('teamName');
         let roomName = window.sessionStorage.getItem('roomName');
     
@@ -75,7 +76,7 @@ export default function Gameboard (props) {
     let board = <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         {gameboardLayout.map(function (row, rowIndex) {
             return <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.paper', borderRadius: 1 }}>{row.map(function(item, colIndex) {
-                return <PlayingCard rank_suit={item} boardValue={gameboard[rowIndex][colIndex]} />
+                return <PlayingCard rank_suit={item} boardValue={gameboard[rowIndex][colIndex]} onClick={() => placePiece(rowIndex, colIndex)} />
             })}</Box>
         })}
     </Box>;

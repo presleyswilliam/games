@@ -40,7 +40,7 @@ class Sequence {
         ['','','','','','','','','',''],
       ];
 
-      this.teams = ['Blue', 'Red'];
+      this.teams = ['Blue', 'Red']; // needs green
       this.teamsTally = {}; this.setupTeamsTally(); // { teamName: numOfTeamMembers [,... teamName: numOfTeamMembers] }
       this.turn;
     }
@@ -111,6 +111,15 @@ class Sequence {
                     'J_twoEyed', 'J_twoEyed', 'J_twoEyed', 'J_twoEyed', 'J_oneEyed', 'J_oneEyed', 'J_oneEyed', 'J_oneEyed'];
       
       this.shuffle1DArray(this.deck);
+    }
+
+    placePiece(team, coords) {
+      // if (this.turn != team) { return; }
+      // if (this.board[coords[0]][coords[1]] != '') { return; }
+
+      this.board[coords[0]][coords[1]] = team;
+
+      // this.turn == this.teams[0] ? this.turn = this.teams[1] : this.turn = this.teams[0];
     }
 
     checkWin(color, placedVal, crownedVal) {

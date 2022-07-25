@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Card, Typography } from "@mui/material";
+import { Box, Card, Stack, Typography } from "@mui/material";
+import Gamepiece from './Gamepiece/Gamepiece';
 
 export default function PlayingCard (props) {
 /* API */
@@ -43,21 +44,30 @@ export default function PlayingCard (props) {
     let cardTopBottomRowJSX;
     let cardMiddleRowJSX;
 
-    if (boardValue !== '' && rank_suit !== "black_joker") {
+    let color = suit === 'diamonds' || suit === 'hearts' ? 'red' : 'black';
+
+    if (boardValue !== '' && rank_suit !== 'black_joker') {
         cardTopBottomRowJSX = suitUnicode + rank;
-    } else if (boardValue !== '' && rank_suit === "black_joker") {
+        cardMiddleRowJSX = <Gamepiece boardValue={boardValue} />;
+    } else if (boardValue !== '' && rank_suit === 'black_joker') {
         cardTopBottomRowJSX = suitUnicode + "JKR";
-    } else {
+        cardMiddleRowJSX = <Gamepiece boardValue={boardValue} />;
+    } else if (boardValue === '' && rank_suit !== 'black_joker') {
         cardTopBottomRowJSX = suitUnicode;
+        cardMiddleRowJSX = rank;
+    } else if (boardValue === '' && rank_suit === 'black_joker') {
+        cardTopBottomRowJSX = suitUnicode;
+        cardMiddleRowJSX = 'JKR';
     }
 
-    cardMiddleRowJSX = rank;
 
     cardJSX = (
-        <Card sx={{ height: '4.2vmax', width: '3vmax', backgroundColor: '#FAF9F6', border: '0.1px solid black', borderRadius: '0.2em', margin: 0.5 }} >
-            <Typography sx={{ fontSize: '1vmax', textAlign: 'left', paddingLeft: 0.5 }}>{cardTopBottomRowJSX}</Typography>
-            <Typography sx={{ fontSize: '1vmax' }}>{cardMiddleRowJSX}</Typography>
-            <Typography sx={{ fontSize: '1vmax', textAlign: 'left', paddingLeft: 0.5, transform: 'rotate(180deg)' }}>{cardTopBottomRowJSX}</Typography>
+        <Card sx={{ height: '4.9vmax', width: '3.5vmax', maxHeight: '7vh', maxWidth: '5vh', backgroundColor: '#FAF9F6', color: color, border: '0.1px solid black', borderRadius: '0.25em', margin: 0.5 }} onClick={props.onClick} >
+            <Stack sx={{ height: '100%' }} justifyContent='space-between'>
+                <Typography sx={{ fontSize: '1.0vmax', letterSpacing: 1, lineHeight: 1, textAlign: 'left', paddingLeft: '8%' }}>{cardTopBottomRowJSX}</Typography>
+                <Typography sx={{ fontSize: '1.0vmax', lineHeight: 1 }}>{cardMiddleRowJSX}</Typography>
+                <Typography sx={{ fontSize: '1.0vmax', letterSpacing: 1, lineHeight: 1, textAlign: 'left', paddingLeft: '8%', transform: 'rotate(180deg)' }}>{cardTopBottomRowJSX}</Typography>
+            </Stack>
         </Card>
     );
 
