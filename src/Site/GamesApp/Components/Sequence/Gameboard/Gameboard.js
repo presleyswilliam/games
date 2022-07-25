@@ -46,7 +46,6 @@ export default function Gameboard (props) {
     }, []); // Initializes because of empty array dependency
     
     function placePiece(rowIndex, colIndex) {
-        console.log('here')
         let teamName = window.sessionStorage.getItem('teamName');
         let roomName = window.sessionStorage.getItem('roomName');
     

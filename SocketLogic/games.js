@@ -27,7 +27,9 @@ module.exports = (server) => {
   // const ioGamesNamespace = io.of('/games');
   var activeGames = {}; // { lobbyName: { game: <game>, [,... otherGameInfo]} [,...{}] }
   var abandonedGames = {}; // { lobbyName: { game: <game>, [,... otherGameInfo]} [,...{}] }
-
+  setInterval(() => {
+    console.log(activeGames)
+  }, 10000);
 
 
   /*** Basic SocketIO Functions ***/
