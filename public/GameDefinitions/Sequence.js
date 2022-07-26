@@ -128,7 +128,7 @@ class Sequence {
 
         /* Set up hands for players */
         this.teamInfo[team]['hand'] = [this.deck.pop(), this.deck.pop(), this.deck.pop(), this.deck.pop(), this.deck.pop(), this.deck.pop(), this.deck.pop()];
-        this.teamInfo[team]['hand'] = [this.deck.pop(), this.deck.pop(), this.deck.pop(), this.deck.pop(), this.deck.pop(), this.deck.pop(), this.deck.pop()];
+
 
       }
       if (this.teamNames.length > 2) { this.sequencesNeededToWin = 1; }

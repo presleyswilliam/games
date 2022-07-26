@@ -10,8 +10,8 @@ export default function PlayingCard (props) {
     let widthHeightRatio = 1.4; // 2.5in : 3.5in => 1:1.4
     let rank_suit = props.rank_suit;
     let boardValue = props.boardValue;
-    let rank = props.rank_suit.split('_')[0];
-    let suit = props.rank_suit.split('_')[1];
+    let rank = props.rank_suit?.split('_')?.[0];
+    let suit = props.rank_suit?.split('_')?.[1];
     let handCardState = props.handCardState;
 
     let suitUnicode;

@@ -50,7 +50,7 @@ export default function Gameboard (props) {
     else if (winner === 'cat') { gameStatusText = '🐈'; }
     else if (winner !== null) { gameStatusText = 'You Lose :('; }
     else if (winner === null && turn === teamName) { gameStatusText = 'Your Turn'; }
-    else if (winner === null && turn !== teamName) { gameStatusText = `Opponent's Turn`; }
+    else if (winner === null && turn !== teamName) { gameStatusText = `${turn}'s Turn`; }
     
 /* Functions */
     useEffect(() => {
