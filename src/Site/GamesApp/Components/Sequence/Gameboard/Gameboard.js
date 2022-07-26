@@ -117,7 +117,6 @@ export default function Gameboard (props) {
 
 /* CSS Classes */
 
-
 /* JSX */
     let gameboardJSX;
 
