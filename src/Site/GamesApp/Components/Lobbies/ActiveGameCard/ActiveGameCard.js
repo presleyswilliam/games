@@ -43,7 +43,7 @@ function joinTeam(newTeamName) {
     let canStart = props.canStart;
     let canJoin = props.canJoin;
     let teamName = window.sessionStorage.getItem('teamName');
-    let teamsTally = props.teamsTally;
+    let teamInfo = props.teamInfo;
 
     
 /* Functions */
@@ -65,10 +65,11 @@ function joinTeam(newTeamName) {
     let gameCardJSX;
 
     let teamsTallyJSX = 
-    Object.keys(teamsTally).map(function(teamNameParam) {
-        let isDisabled = (!isJoined) || (teamName === teamNameParam);
+    Object.keys(teamInfo).map(function(team) {
+        let isDisabled = (!isJoined) || (teamName === team);
+        let teamsTally = teamInfo[team]['teamsTally'];
 
-        return <Button sx={{ margin: 0.5 }} variant='contained' size='small' disabled={isDisabled} style={{...buttonColorStyle(teamNameParam)}} onClick={() => joinTeam(teamNameParam)}>{teamNameParam} {teamsTally[teamNameParam]}</Button>;
+        return <Button sx={{ margin: 0.5 }} variant='contained' size='small' disabled={isDisabled} style={{...buttonColorStyle(team)}} onClick={() => joinTeam(team)}>{team} {teamsTally}</Button>;
     });
 
     let teamsRow = <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center' }}>{teamsTallyJSX}</Box>

@@ -16,7 +16,7 @@ export default function Sequence (props) {
 
 /* JSX */
     let sequenceJSX;
-    sequenceJSX = <Gameboard />;
+    sequenceJSX = <Gameboard setGameName={props.setGameName} />;
 
     return (
         <React.Fragment>

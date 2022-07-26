@@ -11,39 +11,41 @@ class TicTacToe {
         ['', '', '']
       ];
 
-      this.teams = ['Blue', 'Red'];
-      this.teamsTally = {}; this.setupTeamsTally(); // { teamName: numOfTeamMembers [,... teamName: numOfTeamMembers] }
+      this.teamNames = ['Blue', 'Red'];
+      this.teamInfo = {}; this.setupTeams();
       this.turn;
+      this.winner;
     }
 
-    setupTeamsTally() {
-      for (let i = 0; i < this.teams.length; i++) {
-        this.teamsTally[this.teams[i]] = 0;
+    setupTeams() {
+      for (let i = 0; i < this.teamNames.length; i++) {
+        this.teamInfo[this.teamNames[i]] = {};
+        this.teamInfo[this.teamNames[i]]['teamsTally'] = 0;
       }
       // console.log(this)  // 'This' scoping gets messed up with for each? https://stackoverflow.com/questions/45175605/how-to-call-this-inside-for-example-foreach-in-class
-      // this.teams.forEach(function(team) {
+      // this.teamNames.forEach(function(team) {
       //   console.log(this)
-      //   this.teamsTally[team] = 0;
+      //   this.teamInfo[team]['teamsTally] = 0;
       // });
     }
 
     assignTeam() {
       /* Assign team */
 
-      let teamName = Math.random() < 0.5 ? this.teams[0] : this.teams[1];
+      let teamName = Math.random() < 0.5 ? this.teamNames[0] : this.teamNames[1];
 
       /* Tally assigned teams */
-      this.teamsTally[teamName] += 1;
+      this.teamInfo[teamName]['teamsTally'] += 1;
 
       return teamName;
     }
 
     joinTeam(teamName) {
-      this.teamsTally[teamName] += 1;
+      this.teamInfo[teamName]['teamsTally'] += 1;
     }
 
     leaveTeam(teamName) {
-      this.teamsTally[teamName] -= 1;
+      this.teamInfo[teamName]['teamsTally'] -= 1;
     }
 
     canJoin() {
@@ -57,8 +59,8 @@ class TicTacToe {
 
       /* Check to make sure each team has players */
       let allTeamsHavePlayers = true;
-      for (const [team, numOfPlayers] of Object.entries(this.teamsTally)) {
-        if (numOfPlayers === 0) { allTeamsHavePlayers = false; }
+      for (const [team, numOfPlayers] of Object.entries(this.teamInfo)) {
+        if (this.teamInfo[team]['teamsTally'] === 0) { allTeamsHavePlayers = false; }
       }
 
       if (allTeamsHavePlayers) { canStart = true; }
@@ -67,10 +69,31 @@ class TicTacToe {
     }
   
     startGame() {
-      this.turn = this.teams[0];
+      this.turn = this.teamNames[0];
+    }
+
+    nextTurn() {
+      let teamIndex = this.teamNames.indexOf(this.turn);
+      if (teamIndex === this.teamNames.length-1) { this.turn = this.teamNames[0]; } else { this.turn = this.teamNames[teamIndex+1]; }
+    }
+
+    setWinner(winningTeamName) {
+      this.winner = winningTeamName;
+      this.turn = '';
+    }
+
+    placePiece(team, coords) {
+      if (this.turn != team) { return; }
+      if (this.board[coords[0]][coords[1]] != '') { return; }
+
+      this.board[coords[0]][coords[1]] = team;
+
+      this.nextTurn();
     }
 
     checkWin() {
+      if (this.winner !== undefined) { return this.winner; }
+
       let numInARowToWin = 3;
       let directions = [[0,1], [1,1], [1,0], [1,-1]];
       for (let d = 0; d < directions.length; d++) {
@@ -90,7 +113,7 @@ class TicTacToe {
               }
               for (let n = 0; n < checkedSpots.length; n++) {
                 if (checkedSpots[0] !== checkedSpots[n]) { break; }
-                if (n === checkedSpots.length-1 && checkedSpots[0] !== '') { this.turn = ''; return checkedSpots[0]; }
+                if (n === checkedSpots.length-1 && checkedSpots[0] !== '') { this.setWinner(checkedSpots[0]); return this.winner; }
               }
               // let current = this.board[i][j];
               // let next = this.board[i + dRow][j + dCol];
@@ -100,17 +123,8 @@ class TicTacToe {
           }
         }
       }
-      if (!this.board[0].includes('') && !this.board[1].includes('') && !this.board[2].includes('')) { return 'cat'; }
+      if (!this.board[0].includes('') && !this.board[1].includes('') && !this.board[2].includes('')) { this.setWinner('cat'); return this.winner; }
       return null;
-    }
-
-    placePiece(team, coords) {
-      if (this.turn != team) { return; }
-      if (this.board[coords[0]][coords[1]] != '') { return; }
-
-      this.board[coords[0]][coords[1]] = team;
-
-      this.turn == this.teams[0] ? this.turn = this.teams[1] : this.turn = this.teams[0];
     }
   
 }

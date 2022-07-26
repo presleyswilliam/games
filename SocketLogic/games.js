@@ -31,7 +31,7 @@ module.exports = (server) => {
   //   console.log(activeGames)
   // }, 10000);
 
-  
+
 
   /*** Basic SocketIO Functions ***/
   function ioGetAllRoomNames() {
@@ -146,7 +146,7 @@ module.exports = (server) => {
       modifiedActiveGames[key]['numJoined'] = activeGames[key]['numJoined'];
 
       /* teamsTally */
-      modifiedActiveGames[key]['teamsTally'] = JSON.parse(JSON.stringify(activeGames[key]['game'].teamsTally));
+      modifiedActiveGames[key]['teamInfo'] = JSON.parse(JSON.stringify(activeGames[key]['game'].teamInfo));
 
       /* canStart */
       let canStart = activeGames[key]['game'].canStart(numJoined);
@@ -232,11 +232,15 @@ module.exports = (server) => {
   }
 
   function leaveGame(socket, roomName, teamName) {
+    /* Prevent server crashing on undefined game => do nothing instead */
+    let game = activeGames?.[roomName]?.['game'];
+    if (game === undefined) { return; }
+
     /* Leave game */
     socket.leave(roomName);
 
     /* Remove player from game's team object */
-    activeGames[roomName]['game'].leaveTeam(teamName);
+    game.leaveTeam(teamName);
 
     /* Delete from active games IF no clients left */
     let clientsInRoom = getClientsInRoom(roomName);
@@ -254,7 +258,7 @@ module.exports = (server) => {
     let roomName = socketGames[0];
 
     /* Error out if team doesn't exists */
-    let teamExists = activeGames[roomName]['game'].teams.includes(prevTeamName);
+    let teamExists = activeGames[roomName]['game'].teamNames.includes(prevTeamName);
     if (!teamExists) { err = 'Unable to join team. There are no teams with that name.'; clientCallback(null, err); return; }
 
 
@@ -274,21 +278,52 @@ module.exports = (server) => {
 
   /*** Basic Game Functions ***/
   function getGameboardLayout(socket, roomName, clientCallback) {
-    let gameboardLayout = activeGames[roomName]['game'].boardLayout;
+    /* Prevent server crashing on undefined game => do nothing instead */
+    let game = activeGames?.[roomName]?.['game'];
+    if (game === undefined) { return; }
+
+    let gameboardLayout = game.boardLayout;
 
     clientCallback(gameboardLayout);
   }
 
   function getGameboard(socket, roomName, clientCallback) {
-    let gameboard = activeGames[roomName]['game'].board;
+    /* Prevent server crashing on undefined game => do nothing instead */
+    let game = activeGames?.[roomName]?.['game'];
+    if (game === undefined) { return; }
 
-    let winner = activeGames[roomName]['game'].checkWin();
+    let gameboard = game.board;
+    let turn = game.turn;
+    let winner = game.checkWin();
 
-    clientCallback(gameboard, winner);
+    clientCallback(gameboard, turn, winner);
+  }
+
+  function getHand(socket, roomName, teamName, clientCallback) {
+    /* Prevent server crashing on undefined game => do nothing instead */
+    let game = activeGames?.[roomName]?.['game'];
+    if (game === undefined) { return; }
+
+    let hand = game.teamInfo[teamName]['hand'];
+
+    clientCallback(hand);
+  }
+
+  function swapHandCard(socket, roomName, teamName, handIndex) {
+    /* Prevent server crashing on undefined game => do nothing instead */
+    let game = activeGames?.[roomName]?.['game'];
+    if (game === undefined) { return; }
+
+    let didSwap = game.swapHandCard(teamName, handIndex);
+    if (didSwap) { io.emit('updateGameboard'); }
   }
 
   function placePiece(socket, roomName, teamName, coord) {
-    activeGames[roomName]['game'].placePiece(teamName, coord);
+    /* Prevent server crashing on undefined game => do nothing instead */
+    let game = activeGames?.[roomName]?.['game'];
+    if (game === undefined) { return; }
+
+    game.placePiece(teamName, coord);
 
     io.emit('updateGameboard');
   }
@@ -315,6 +350,8 @@ module.exports = (server) => {
     /*** Basic Game Functions ***/
     socket.on('getGameboardLayout', (roomName, clientCallback) => { getGameboardLayout(socket, roomName, clientCallback)} );
     socket.on('getGameboard', (roomName, clientCallback) => { getGameboard(socket, roomName, clientCallback)} );
+    socket.on('getHand', (roomName, teamName, clientCallback) => { getHand(socket, roomName, teamName, clientCallback)} );
+    socket.on('swapHandCard', (roomName, teamName, handIndex) => { swapHandCard(socket, roomName, teamName, handIndex)} );
     socket.on('placePiece', (roomName, teamName, coord) => { placePiece(socket, roomName, teamName, coord)} );
     // io.emit('updateGameboard');
 

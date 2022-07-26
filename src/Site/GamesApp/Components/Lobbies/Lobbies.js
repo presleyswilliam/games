@@ -7,6 +7,7 @@ export default function Lobbies (props) {
 /* API */
     function getLobbies() {
         window.socket.emit('getActiveLobbies', (lobbies) => {
+            // console.log(lobbies)
             setLobbies(lobbies);
         })
     }
@@ -15,7 +16,7 @@ export default function Lobbies (props) {
     const [lobbies, setLobbies] = useState({});
 
     let gameType;
-    let teamsTally;
+    let teamInfo;
     let canJoin;
     let canStart;
     let isJoined;
@@ -41,12 +42,12 @@ export default function Lobbies (props) {
         if (lobbies[lobbyNameKey]['isJoined'] && lobbies[lobbyNameKey]['isStarted']) { props.setGameName(lobbies[lobbyNameKey]['gameType']) } else if (lobbies[lobbyNameKey]['isStarted'] === true) { return; }
 
         gameType = lobbies[lobbyNameKey]['gameType'];
-        teamsTally = lobbies[lobbyNameKey]['teamsTally'];
+        teamInfo = lobbies[lobbyNameKey]['teamInfo'];
         canJoin = lobbies[lobbyNameKey]['canJoin'];
         canStart = lobbies[lobbyNameKey]['canStart'];
         isJoined = lobbies[lobbyNameKey]['isJoined'];
 
-        return <ActiveGameCard roomName={lobbyNameKey} gameType={gameType} teamsTally={teamsTally} canJoin={canJoin} canStart={canStart} isJoined={isJoined}/>;
+        return <ActiveGameCard roomName={lobbyNameKey} gameType={gameType} teamInfo={teamInfo} canJoin={canJoin} canStart={canStart} isJoined={isJoined}/>;
     });
 
     lobbiesJSX = <Box sx={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.paper', borderRadius: 1 }}>{lobbyCardsJSX}<CreateNewGame /></Box>;
