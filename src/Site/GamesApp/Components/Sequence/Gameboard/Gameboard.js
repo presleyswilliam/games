@@ -131,7 +131,7 @@ export default function Gameboard (props) {
         </Box>;
 
     let handJSX = 
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: 5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: 1, height: 80 }}>
             {hand.map(function (item, index) {
                 return <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.paper', borderRadius: 1 }}><PlayingCard handCardState={handCardState[index]} rank_suit={item} boardValue={''} onClick={() => handleHandClick(index)} /></Box>
             })}

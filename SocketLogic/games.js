@@ -115,7 +115,7 @@ module.exports = (server) => {
   function deleteRoom(roomName) {
     delete activeGames[roomName];
     delete abandonedGames[roomName];
-    console.log(`Deleted room: ${roomName}`)
+    // console.log(`Deleted room: ${roomName}`)
   }
 
   function getNumJoined(roomName) {
