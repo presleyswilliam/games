@@ -45,10 +45,12 @@ export default function Gameboard (props) {
     const [winner, setWinner] = useState(null);
     
     let teamName = window.sessionStorage.getItem('teamName');
-    let winnerText = '';
-    if (winner === teamName) { winnerText = 'You Win!'; }
-    else if (winner === 'cat') { winnerText = '🐈'; }
-    else if (winner !== null) { winnerText = 'You Lose :('; }
+    let gameStatusText = '';
+    if (winner === teamName) { gameStatusText = 'You Win!'; }
+    else if (winner === 'cat') { gameStatusText = '🐈'; }
+    else if (winner !== null) { gameStatusText = 'You Lose :('; }
+    else if (winner === null && turn === teamName) { gameStatusText = 'Your Turn'; }
+    else if (winner === null && turn !== teamName) { gameStatusText = `Opponent's Turn`; }
     
 /* Functions */
     useEffect(() => {
@@ -139,7 +141,7 @@ export default function Gameboard (props) {
     
     gameboardJSX = (
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
-            <Typography sx={{ fontFamily: 'Monospace', fontSize: '2em' }}>{winnerText}</Typography>
+            <Typography sx={{ fontFamily: 'Monospace', fontSize: '2em' }}>{gameStatusText}</Typography>
             {boardJSX}
             {handJSX}
             {winner !== null ? returnButton : <React.Fragment></React.Fragment>}

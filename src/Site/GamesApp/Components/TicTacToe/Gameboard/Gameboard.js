@@ -7,19 +7,23 @@ function getGameboard() {
     let roomName = window.sessionStorage.getItem('roomName');
     window.socket.emit('getGameboard', roomName, (gameboard, turn, winner) => {
         setGameboard(gameboard);
+        setTurn(turn);
         if (winner !== null) { setWinner(winner); }
     })
 }
 
 /* Variables */
 const [gameboard, setGameboard] = useState([['', '', ''],['', '', ''],['', '', '']]);
+const [turn, setTurn] = useState('');
 const [winner, setWinner] = useState(null);
 
 let teamName = window.sessionStorage.getItem('teamName');
-let winnerText = '';
-if (winner === teamName) { winnerText = 'You Win!'; }
-else if (winner === 'cat') { winnerText = '🐈'; }
-else if (winner !== null) { winnerText = 'You Lose :('; }
+let gameStatusText = '';
+if (winner === teamName) { gameStatusText = 'You Win!'; }
+else if (winner === 'cat') { gameStatusText = '🐈'; }
+else if (winner !== null) { gameStatusText = 'You Lose :('; }
+else if (winner === null && turn === teamName) { gameStatusText = 'Your Turn'; }
+else if (winner === null && turn !== teamName) { gameStatusText = `Opponent's Turn`; }
 
 /* Functions */
 useEffect(() => {
@@ -35,6 +39,9 @@ useEffect(() => {
 function placePiece(rowIndex, colIndex) {
     let teamName = window.sessionStorage.getItem('teamName');
     let roomName = window.sessionStorage.getItem('roomName');
+    
+    /* Validation */
+    if (turn !== teamName) { /*alert('Wait your turn.');*/ return; }
 
     let coord = [rowIndex, colIndex];
 
@@ -70,7 +77,7 @@ function returnToLobbies() {
 
     gameboardJSX = (
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
-            <Typography sx={{ fontFamily: 'Monospace', fontSize: '2em' }}>{winnerText}</Typography>
+            <Typography sx={{ fontFamily: 'Monospace', fontSize: '2em' }}>{gameStatusText}</Typography>
             {board}
             {winner !== null ? returnButton : <React.Fragment></React.Fragment>}
         </Box>
