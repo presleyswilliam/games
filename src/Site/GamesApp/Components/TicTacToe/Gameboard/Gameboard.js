@@ -67,7 +67,7 @@ function returnToLobbies() {
     
     let board = <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         {gameboard.map(function (row, rowIndex) {
-            return <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.paper', borderRadius: 1 }}>{row.map(function(item, colIndex) {
+            return <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 1 }}>{row.map(function(item, colIndex) {
                 return <Card sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 100, height: 100, margin: 0.5, backgroundColor: item == '' ? 'lightgrey' : item == teamName ? 'lightgreen' : 'red', cursor: 'pointer' }} onClick={() => placePiece(rowIndex, colIndex)}></Card>
             })}</Box>
         })}

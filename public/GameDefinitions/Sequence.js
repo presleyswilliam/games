@@ -115,6 +115,9 @@ class Sequence {
                     'black_joker','9_spades','8_spades','7_spades','6_spades','5_spades','4_spades','3_spades','2_spades','black_joker',
                     'J_twoEyed', 'J_twoEyed', 'J_twoEyed', 'J_twoEyed', 'J_oneEyed', 'J_oneEyed', 'J_oneEyed', 'J_oneEyed'];
 
+        // this.deck = ['black_joker','6_diamonds','7_diamonds','8_diamonds','9_diamonds','10_diamonds','Q_diamonds','K_diamonds','A_diamonds','black_joker',
+        //               '5_diamonds','3_hearts','2_hearts','2_spades'];
+
       this.shuffle1DArray(this.deck);
 
       for (const [team, teamInfoValues] of Object.entries(this.teamInfo)) {
@@ -152,7 +155,7 @@ class Sequence {
 
     swapCard(team, handIndex) {
       this.teamInfo[team]['hand'].splice(handIndex, 1);
-      this.teamInfo[team]['hand'].push(this.deck.pop());
+      if (this.deck.length > 0) { this.teamInfo[team]['hand'].push(this.deck.pop()); }
     }
 
     swapHandCard(team, handIndex) {
@@ -187,7 +190,15 @@ class Sequence {
     }
 
     checkWin() {
+      /* Winner already defined */
       if (this.winner !== undefined) { return this.winner; }
+
+      /* Checking if players have cards in hand */
+      let anyTeamHasCards = false;
+      for (const [team, teamInfoValues] of Object.entries(this.teamInfo)) {
+        if (this.teamInfo[team]['hand'].length !== 0) { anyTeamHasCards = true; }
+      }
+      if (anyTeamHasCards === false) { this.winner = 'cat'; return this.winner; }
       
       let directions = [[0,1], [1,1], [1,0], [1,-1]];
       for (let d = 0; d < directions.length; d++) {

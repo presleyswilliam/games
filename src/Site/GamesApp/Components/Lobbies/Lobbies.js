@@ -50,7 +50,7 @@ export default function Lobbies (props) {
         return <ActiveGameCard roomName={lobbyNameKey} gameType={gameType} teamInfo={teamInfo} canJoin={canJoin} canStart={canStart} isJoined={isJoined}/>;
     });
 
-    lobbiesJSX = <Box sx={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.paper', borderRadius: 1 }}>{lobbyCardsJSX}<CreateNewGame /></Box>;
+    lobbiesJSX = <Box sx={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'center', borderRadius: 1 }}>{lobbyCardsJSX}<CreateNewGame /></Box>;
 
     return (
         <React.Fragment>

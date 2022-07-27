@@ -123,7 +123,7 @@ export default function Gameboard (props) {
     let boardJSX = 
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
             {gameboardLayout.map(function (row, rowIndex) {
-                return <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.paper', borderRadius: 1 }}>{row.map(function(item, colIndex) {
+                return <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 1 }}>{row.map(function(item, colIndex) {
                     return <PlayingCard rank_suit={item} boardValue={gameboard[rowIndex][colIndex]} handCardState={''} onClick={() => placePiece(rowIndex, colIndex)} />
                 })}</Box>
             })}
@@ -132,18 +132,17 @@ export default function Gameboard (props) {
     let handJSX = 
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: 1, height: 80 }}>
             {hand.map(function (item, index) {
-                return <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.paper', borderRadius: 1 }}><PlayingCard handCardState={handCardState[index]} rank_suit={item} boardValue={''} onClick={() => handleHandClick(index)} /></Box>
+                return <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 1 }}><PlayingCard handCardState={handCardState[index]} rank_suit={item} boardValue={''} onClick={() => handleHandClick(index)} /></Box>
             })}
         </Box>;
 
-    let returnButton = <Button sx={{ margin: 1 }} variant='contained' size='small' onClick={() => returnToLobbies()}><Typography sx={{ fontFamily: 'Monospace'}}>{'Return to Lobbies'}</Typography></Button>;
+    let returnButton = <Button sx={{ margin: 2 }} variant='contained' size='small' onClick={() => returnToLobbies()}><Typography sx={{ fontFamily: 'Monospace'}}>{'Return to Lobbies'}</Typography></Button>;
     
     gameboardJSX = (
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
             <Typography sx={{ fontFamily: 'Monospace', fontSize: '2em' }}>{gameStatusText}</Typography>
             {boardJSX}
-            {handJSX}
-            {winner !== null ? returnButton : <React.Fragment></React.Fragment>}
+            {winner !== null ? returnButton : handJSX}
         </Box>
     );
 
