@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import CircleIcon from '@mui/icons-material/Circle';
+import { MdCircle } from 'react-icons/md';
 import './Gamepiece.css';
 
 export default function Gamepiece (props) {
@@ -16,7 +16,7 @@ export default function Gamepiece (props) {
 
 /* JSX */
     let gamepieceJSX;
-    gamepieceJSX = <CircleIcon style={{ animation: 'dropPiece 0.5s', color: props.boardValue }} />;
+    gamepieceJSX = <MdCircle size={'2em'} style={{ animation: 'dropPiece 0.5s', color: props.boardValue }} />;
 
     return (
         <React.Fragment>
