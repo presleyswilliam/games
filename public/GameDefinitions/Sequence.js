@@ -174,7 +174,7 @@ class Sequence {
       let boardCardRank = this.board[coords['boardCoords'][0]][coords['boardCoords'][1]];
       let handCardRank = this.teamInfo[team]['hand'][coords['handIndex']];
       if (boardCardRank !== '' && handCardRank !== 'J_oneEyed') { return; } // If spot is already taken and not using remove jack
-      if (handCardRank === 'J_oneEyed' && (boardCardRank === '' || boardCardRank === team || boardCardRank === 'Gold')) { return; } // If using remove jack but the spot is empty, your own token, or a sequence
+      if (handCardRank === 'J_oneEyed' && (boardCardRank === '' || boardCardRank === team || boardCardRank.split('_S').length > 1)) { return; } // If using remove jack but the spot is empty, your own token, or a sequence
 
       if (handCardRank === 'J_oneEyed') { this.board[coords['boardCoords'][0]][coords['boardCoords'][1]] = ''; }
       else { this.board[coords['boardCoords'][0]][coords['boardCoords'][1]] = team; }
