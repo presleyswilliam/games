@@ -3,12 +3,12 @@ import { Box, Button, Card, CardActions, CardContent, Typography } from "@mui/ma
 
 export default function Gameboard (props) {
 /* API */
-function getGameboard() {
+function getGameState() {
     let roomName = window.sessionStorage.getItem('roomName');
-    window.socket.emit('getGameboard', roomName, (gameboard, turn, winner) => {
-        setGameboard(gameboard);
-        setTurn(turn);
-        if (winner !== null) { setWinner(winner); }
+    window.socket.emit('getGameState', roomName, (gameState) => {
+        setGameboard(gameState.gameboard);
+        setTurn(gameState.turn);
+        if (gameState.winner !== null) { setWinner(gameState.winner); }
     })
 }
 
@@ -27,9 +27,9 @@ else if (winner === null && turn !== teamName) { gameStatusText = `Opponent's Tu
 
 /* Functions */
 useEffect(() => {
-    getGameboard();
+    getGameState();
 
-    window.socket.on('updateGameboard', () => { getGameboard(); });
+    window.socket.on('updateGameboard', () => { getGameState(); });
 
     return () => {  // Teardown function
         window.socket.off('updateGameboard');

@@ -12,26 +12,21 @@ export default function Gameboard (props) {
         })
     }
 
-    function getGameboard() {
-        let roomName = window.sessionStorage.getItem('roomName');
-        window.socket.emit('getGameboard', roomName, (gameboard, turn, winner) => {
-            setGameboard(gameboard);
-            setTurn(turn);
-            if (winner !== null) { setWinner(winner); }
-        })
-    }
-
-    function getHand() {
+    function getGameState() {
         let roomName = window.sessionStorage.getItem('roomName');
         let teamName = window.sessionStorage.getItem('teamName');
-        window.socket.emit('getHand', roomName, teamName, (hand) => {
-            setHand(hand);
+        let params = { 'roomName': roomName, 'teamName': teamName };
+        window.socket.emit('getGameState', params, (gameState) => {
+            setGameboard(gameState.gameboard);
+            setHand(gameState.hand);
+            setTurn(gameState.turn);
+            if (gameState.winner !== null) { setWinner(gameState.winner); }
+            setLastPlacedCoords(gameState.lastPlacedCoords);
         })
     }
 
     function updateGameState() {
-        getGameboard();
-        getHand();
+        getGameState();
     }
     
 /* Variables */
@@ -43,6 +38,7 @@ export default function Gameboard (props) {
     const [hand, setHand] = useState(handInit);
     const [handCardState, setHandCardState] = useState(handInit);
     const [winner, setWinner] = useState(null);
+    const [lastPlacedCoords, setLastPlacedCoords] = useState({});
     
     let teamName = window.sessionStorage.getItem('teamName');
     let gameStatusText = '';
@@ -55,8 +51,7 @@ export default function Gameboard (props) {
 /* Functions */
     useEffect(() => {
         getGameboardLayout();
-        getGameboard();
-        getHand();
+        getGameState();
     
         window.socket.on('updateGameboard', () => { updateGameState(); });
     
@@ -124,7 +119,8 @@ export default function Gameboard (props) {
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
             {gameboardLayout.map(function (row, rowIndex) {
                 return <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 1 }}>{row.map(function(item, colIndex) {
-                    return <PlayingCard rank_suit={item} boardValue={gameboard[rowIndex][colIndex]} handCardState={''} onClick={() => placePiece(rowIndex, colIndex)} />
+                    let lastPlacedBool = (lastPlacedCoords['row'] === rowIndex && lastPlacedCoords['col'] === colIndex);
+                    return <PlayingCard rank_suit={item} boardValue={gameboard[rowIndex][colIndex]} handCardState={''} isLastPlaced={lastPlacedBool} onClick={() => placePiece(rowIndex, colIndex)} />
                 })}</Box>
             })}
         </Box>;

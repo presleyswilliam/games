@@ -126,6 +126,16 @@ class TicTacToe {
       if (!this.board[0].includes('') && !this.board[1].includes('') && !this.board[2].includes('')) { this.setWinner('cat'); return this.winner; }
       return null;
     }
+
+    getGameState(params) {
+      let gameState = {};
+      let gameboard = this.board;
+      let turn = this.turn;
+      let winner = this.checkWin();
+
+      gameState = { 'gameboard': gameboard, 'turn': turn, 'winner': winner };
+      return gameState;
+    }
   
 }
 

@@ -3,3 +3,17 @@
   50%  { transform: scale(0.8); }
   100% { transform: scale(1); }
 }
+.dropPiece {
+  animation-name: dropPiece;
+  animation-duration: 0.5s;
+}
+
+@keyframes lastPlacedIndicator {
+  to {color: lightgrey;}
+}
+.lastPlacedIndicator {
+  animation-name: lastPlacedIndicator;
+  animation-duration: 0.75s;
+  animation-direction: alternate;
+  animation-iteration-count: infinite;
+}

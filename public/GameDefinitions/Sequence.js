@@ -43,8 +43,10 @@ class Sequence {
       this.teamNames = ['Blue', 'Red', 'Green'];
       this.teamInfo = {}; this.setupTeams();
       this.turn;
-      this.winner;
+      this.winner = null;
       this.sequencesNeededToWin = 2;
+
+      this.lastPlacedCoords = {};
     }
 
     setupTeams() {
@@ -134,9 +136,8 @@ class Sequence {
 
 
       }
+
       if (this.teamNames.length > 2) { this.sequencesNeededToWin = 1; }
-
-
 
       this.turn = this.teamNames[0];
     }
@@ -144,13 +145,6 @@ class Sequence {
     nextTurn() {
       let teamIndex = this.teamNames.indexOf(this.turn);
       if (teamIndex === this.teamNames.length-1) { this.turn = this.teamNames[0]; } else { this.turn = this.teamNames[teamIndex+1]; }
-    }
-
-    tallySequencesForWinner(teamName) {
-      this.teamInfo[teamName]['sequences'] += 1;
-      if (this.teamInfo[teamName]['sequences'] == this.sequencesNeededToWin) { this.winner = teamName; this.turn = ''; return this.winner; }
-
-      return undefined;
     }
 
     swapCard(team, handIndex) {
@@ -184,14 +178,23 @@ class Sequence {
 
       if (handCardRank === 'J_oneEyed') { this.board[coords['boardCoords'][0]][coords['boardCoords'][1]] = ''; }
       else { this.board[coords['boardCoords'][0]][coords['boardCoords'][1]] = team; }
+
+      this.lastPlacedCoords = { 'row': coords['boardCoords'][0], 'col': coords['boardCoords'][1] };
+
       this.swapCard(team, coords['handIndex']);
 
       this.nextTurn();
     }
 
+    tallySequencesForWinner(teamName) {
+      this.teamInfo[teamName]['sequences'] += 1;
+      if (this.teamInfo[teamName]['sequences'] === this.sequencesNeededToWin) { this.winner = teamName; this.turn = ''; return this.winner; }
+      return null;
+    }
+
     checkWin() {
       /* Winner already defined */
-      if (this.winner !== undefined) { return this.winner; }
+      if (this.winner !== null) { return this.winner; }
 
       /* Checking if players have cards in hand */
       let anyTeamHasCards = false;
@@ -213,11 +216,11 @@ class Sequence {
               for (let n = 0; n < this.teamNames.length; n++) {
                 let team = this.teamNames[n];
                 if (current == team && current == this.board[i + dRow][j + dCol] && current == this.board[i + (2*dRow)][j + (2*dCol)] && current == this.board[i + (3*dRow)][j + (3*dCol)] && current == this.board[lastRow][lastCol]) {
-                  this.board[i][j] = 'Gold';
-                  this.board[i + dRow][j + dCol] = 'Gold';
-                  this.board[i + (2*dRow)][j + (2*dCol)] = 'Gold';
-                  this.board[i + (3*dRow)][j + (3*dCol)] = 'Gold';
-                  this.board[lastRow][lastCol] = 'Gold';
+                  this.board[i][j] = team + '_S';
+                  this.board[i + dRow][j + dCol] = team + '_S';
+                  this.board[i + (2*dRow)][j + (2*dCol)] = team + '_S';
+                  this.board[i + (3*dRow)][j + (3*dCol)] = team + '_S';
+                  this.board[lastRow][lastCol] = team + '_S';
                   return this.tallySequencesForWinner(team);
       
                   // if (color == "blue") {
@@ -234,6 +237,18 @@ class Sequence {
         } //end outer for
       } //end direction
       return null;
+    }
+
+    getGameState(params) {
+      let gameState = {};
+      let gameboard = this.board;
+      let turn = this.turn;
+      let winner = this.checkWin();
+      let lastPlacedCoords = this.lastPlacedCoords;
+      let hand = this.teamInfo[params.teamName]['hand']
+
+      gameState = { 'gameboard': gameboard, 'turn': turn, 'winner': winner, 'lastPlacedCoords': lastPlacedCoords, 'hand': hand };
+      return gameState;
     }
   
 }
