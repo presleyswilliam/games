@@ -11,6 +11,9 @@
 @keyframes lastPlacedIndicator {
   to {color: lightgrey;}
 }
+@-webkit-keyframes lastPlacedIndicator {
+  to {color: lightgrey;}
+}
 .lastPlacedIndicator {
   animation-name: lastPlacedIndicator;
   animation-duration: 0.75s;
