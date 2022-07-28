@@ -9,10 +9,7 @@
 }
 
 @keyframes lastPlacedIndicator {
-  to {color: lightgrey;}
-}
-@-webkit-keyframes lastPlacedIndicator {
-  to {color: lightgrey;}
+  to { filter: opacity(10%); }
 }
 .lastPlacedIndicator {
   animation-name: lastPlacedIndicator;
