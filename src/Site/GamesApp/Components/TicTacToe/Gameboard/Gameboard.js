@@ -5,7 +5,8 @@ export default function Gameboard (props) {
 /* API */
 function getGameState() {
     let roomName = window.sessionStorage.getItem('roomName');
-    window.socket.emit('getGameState', roomName, (gameState) => {
+    let params = { 'roomName': roomName };
+    window.socket.emit('getGameState', params, (gameState) => {
         setGameboard(gameState.gameboard);
         setTurn(gameState.turn);
         if (gameState.winner !== null) { setWinner(gameState.winner); }
