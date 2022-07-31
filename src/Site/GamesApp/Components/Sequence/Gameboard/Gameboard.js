@@ -42,7 +42,7 @@ export default function Gameboard (props) {
     const [turn, setTurn] = useState('');
     const [hand, setHand] = useState(handInit);
     const [handSelectedIndex, setHandSelectedIndex] = useState(-1);
-    const [inHandCardShadows, setInHandCardShadows] = useState(false);
+    const [inHandCardShadows, setInHandCardShadows] = useState(window.sessionStorage.getItem('inHandCardShadows') === null ? false : window.sessionStorage.getItem('inHandCardShadows'));
     const [winner, setWinner] = useState(null);
     const [lastPlacedCoords, setLastPlacedCoords] = useState({});
     
@@ -117,7 +117,7 @@ export default function Gameboard (props) {
 /* JSX */
     let gameboardJSX;
 
-    let inHandShadowSwitch = <Box sx={{ display: 'flex', height: '5%', width: '100%', justifyContent: 'flex-end' }}><Switch checked={inHandCardShadows} onChange={e => setInHandCardShadows(e.target.checked) } /></Box>
+    let inHandShadowSwitch = <Box sx={{ display: 'flex', height: '5%', width: '100%', justifyContent: 'flex-end' }}><Switch checked={inHandCardShadows} onChange={e => { setInHandCardShadows(e.target.checked); window.sessionStorage.setItem('inHandCardShadows', e.target.checked); } } /></Box>
 
     let boardJSX = 
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
@@ -125,7 +125,8 @@ export default function Gameboard (props) {
                 return <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 1 }}>{row.map(function(item, colIndex) {
                     let lastPlacedBool = (lastPlacedCoords['row'] === rowIndex && lastPlacedCoords['col'] === colIndex);
                     let isInHandBool = (hand.includes(item) && inHandCardShadows);
-                    return <PlayingCard rank_suit={item} boardValue={gameboard[rowIndex][colIndex]} handCardState={''} isInHand={isInHandBool} isLastPlaced={lastPlacedBool} onClick={() => placePiece(rowIndex, colIndex)} />
+                    let isSelectedHandCard = (hand[handSelectedIndex] === item);
+                    return <PlayingCard rank_suit={item} boardValue={gameboard[rowIndex][colIndex]} handCardState={''} isInHand={isInHandBool} isSelectedHandCard={isSelectedHandCard} isLastPlaced={lastPlacedBool} onClick={() => placePiece(rowIndex, colIndex)} />
                 })}</Box>
             })}
         </Box>;
