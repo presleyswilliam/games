@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Card, CardActions, CardContent, Typography } from "@mui/material";
+import { Box, Button, Card, CardActions, CardContent, Switch, Typography } from "@mui/material";
+// import { GiTwoShadows } from 'react-icons/gi';//checkedIcon={<GiTwoShadows />}
 import PlayingCard from './PlayingCard/PlayingCard';
 
 export default function Gameboard (props) {
@@ -41,6 +42,7 @@ export default function Gameboard (props) {
     const [turn, setTurn] = useState('');
     const [hand, setHand] = useState(handInit);
     const [handSelectedIndex, setHandSelectedIndex] = useState(-1);
+    const [inHandCardShadows, setInHandCardShadows] = useState(false);
     const [winner, setWinner] = useState(null);
     const [lastPlacedCoords, setLastPlacedCoords] = useState({});
     
@@ -115,12 +117,15 @@ export default function Gameboard (props) {
 /* JSX */
     let gameboardJSX;
 
+    let inHandShadowSwitch = <Box sx={{ display: 'flex', height: '5%', width: '100%', justifyContent: 'flex-end' }}><Switch checked={inHandCardShadows} onChange={e => setInHandCardShadows(e.target.checked) } /></Box>
+
     let boardJSX = 
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
             {gameboardLayout.map(function (row, rowIndex) {
                 return <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 1 }}>{row.map(function(item, colIndex) {
                     let lastPlacedBool = (lastPlacedCoords['row'] === rowIndex && lastPlacedCoords['col'] === colIndex);
-                    return <PlayingCard rank_suit={item} boardValue={gameboard[rowIndex][colIndex]} handCardState={''} isLastPlaced={lastPlacedBool} onClick={() => placePiece(rowIndex, colIndex)} />
+                    let isInHandBool = (hand.includes(item) && inHandCardShadows);
+                    return <PlayingCard rank_suit={item} boardValue={gameboard[rowIndex][colIndex]} handCardState={''} isInHand={isInHandBool} isLastPlaced={lastPlacedBool} onClick={() => placePiece(rowIndex, colIndex)} />
                 })}</Box>
             })}
         </Box>;
@@ -137,11 +142,14 @@ export default function Gameboard (props) {
     let returnButton = <Button sx={{ margin: 2 }} variant='contained' size='small' onClick={() => returnToLobbies()}><Typography sx={{ fontFamily: 'Monospace'}}>{'Return to Lobbies'}</Typography></Button>;
     
     gameboardJSX = (
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
-            <Typography sx={{ fontFamily: 'Monospace', fontSize: '2em' }}>{gameStatusText}</Typography>
-            {boardJSX}
-            {winner !== null ? returnButton : handJSX}
-        </Box>
+        <React.Fragment>
+        {inHandShadowSwitch}
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '95%', width: '100%' }}>
+                <Typography sx={{ fontFamily: 'Monospace', fontSize: '2em' }}>{gameStatusText}</Typography>
+                {boardJSX}
+                {winner !== null ? returnButton : handJSX}
+            </Box>
+        </React.Fragment>
     );
 
     return (
