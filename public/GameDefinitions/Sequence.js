@@ -54,6 +54,7 @@ class Sequence {
         this.teamInfo[this.teamNames[i]] = {};
         this.teamInfo[this.teamNames[i]]['teamsTally'] = 0;
         this.teamInfo[this.teamNames[i]]['hand'] = [];
+        this.teamInfo[this.teamNames[i]]['selectedCardIndex'] = null;
         this.teamInfo[this.teamNames[i]]['sequences'] = 0;
       }
     }
@@ -152,6 +153,25 @@ class Sequence {
       if (this.deck.length > 0) { this.teamInfo[team]['hand'].push(this.deck.pop()); }
     }
 
+    readyHandCard(team, handIndex) {
+      if (this.teamInfo[team]['selectedCardIndex'] === null) {
+        this.teamInfo[team]['selectedCardIndex'] = handIndex;
+        return true;
+      } else {
+        this.teamInfo[team]['selectedCardIndex'] = null;
+        return true;
+      }
+    }
+
+    selectHandCard(team, handIndex) {
+      if (this.teamInfo[team]['selectedCardIndex'] === handIndex) {
+        this.teamInfo[team]['selectedCardIndex'] = null;
+        this.swapHandCard(team, handIndex);
+      } else {
+        this.teamInfo[team]['selectedCardIndex'] = handIndex;
+      }
+    }
+
     swapHandCard(team, handIndex) {
       let handCardRank = this.teamInfo[team]['hand'][handIndex];
       if (handCardRank === 'J_twoEyed' || handCardRank === 'J_oneEyed') { return; }
@@ -182,6 +202,8 @@ class Sequence {
       this.lastPlacedCoords = { 'row': coords['boardCoords'][0], 'col': coords['boardCoords'][1] };
 
       this.swapCard(team, coords['handIndex']);
+
+      this.teamInfo[team]['selectedCardIndex'] = null;
 
       this.nextTurn();
     }
@@ -245,9 +267,10 @@ class Sequence {
       let turn = this.turn;
       let winner = this.checkWin();
       let lastPlacedCoords = this.lastPlacedCoords;
-      let hand = this.teamInfo[params.teamName]['hand']
+      let hand = this.teamInfo[params.teamName]['hand'];
+      let selectedCardIndex = this.teamInfo[params.teamName]['selectedCardIndex'];
 
-      gameState = { 'gameboard': gameboard, 'turn': turn, 'winner': winner, 'lastPlacedCoords': lastPlacedCoords, 'hand': hand };
+      gameState = { 'gameboard': gameboard, 'turn': turn, 'winner': winner, 'lastPlacedCoords': lastPlacedCoords, 'hand': hand, 'selectedCardIndex': selectedCardIndex };
       return gameState;
     }
   

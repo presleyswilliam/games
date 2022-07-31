@@ -19,14 +19,18 @@ export default function Gameboard (props) {
         window.socket.emit('getGameState', params, (gameState) => {
             setGameboard(gameState.gameboard);
             setHand(gameState.hand);
+            setHandSelectedIndex(gameState.selectedCardIndex === null ? -1 : gameState.selectedCardIndex);
             setTurn(gameState.turn);
             if (gameState.winner !== null) { setWinner(gameState.winner); }
             setLastPlacedCoords(gameState.lastPlacedCoords);
         })
     }
 
-    function updateGameState() {
-        getGameState();
+    function selectHandCard(handIndex) {
+        let roomName = window.sessionStorage.getItem('roomName');
+        let teamName = window.sessionStorage.getItem('teamName');
+        let params = { 'roomName': roomName, 'teamName': teamName, 'handIndex': handIndex };
+        window.socket.emit('selectHandCard', params);
     }
     
 /* Variables */
@@ -36,7 +40,7 @@ export default function Gameboard (props) {
     const [gameboard, setGameboard] = useState(gameboardInit);
     const [turn, setTurn] = useState('');
     const [hand, setHand] = useState(handInit);
-    const [handCardState, setHandCardState] = useState(handInit);
+    const [handSelectedIndex, setHandSelectedIndex] = useState(-1);
     const [winner, setWinner] = useState(null);
     const [lastPlacedCoords, setLastPlacedCoords] = useState({});
     
@@ -60,18 +64,14 @@ export default function Gameboard (props) {
         };
     }, []); // Initializes because of empty array dependency
 
+    function updateGameState() {
+        getGameState();
+    }
+
     function handleHandClick(index) {
         if (winner !== null) { return; }
-        let teamName = window.sessionStorage.getItem('teamName');
-        let roomName = window.sessionStorage.getItem('roomName');
 
-        let newHandCardState = '';
-        if (handCardState[index] === '') { newHandCardState = 'raised'; }
-        else if (handCardState[index] === 'raised') { window.socket.emit('swapHandCard', roomName, teamName, index); newHandCardState = ''; }
-        
-        let newHandCardStateArr = handInit;
-        newHandCardStateArr[index] = newHandCardState;
-        setHandCardState(newHandCardStateArr);
+        selectHandCard(index);
     }
     
     function placePiece(rowIndex, colIndex) {
@@ -82,7 +82,7 @@ export default function Gameboard (props) {
         if (turn !== teamName) { /*alert('Wait your turn.');*/ return; }
         
         let boardCardRank = gameboardLayout[rowIndex][colIndex];
-        let handCardSelectedIndex = handCardState.indexOf('raised');
+        let handCardSelectedIndex = handSelectedIndex;
         let handCardSelectedRank = hand[handCardSelectedIndex];
         let isHandCardSelected = handCardSelectedIndex !== -1;
         let isHandCardSameAsBoardCard = hand[handCardSelectedIndex] === boardCardRank;
@@ -95,7 +95,7 @@ export default function Gameboard (props) {
         let coord = { 'handIndex': handIndex, 'boardCoords': boardCoords};
     
         window.socket.emit('placePiece', roomName, teamName, coord);
-        setHandCardState(handInit);
+        setHandSelectedIndex(-1);
     }
     
     function returnToLobbies() {
@@ -128,7 +128,9 @@ export default function Gameboard (props) {
     let handJSX = 
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: 1, height: 80 }}>
             {hand.map(function (item, index) {
-                return <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 1 }}><PlayingCard handCardState={handCardState[index]} rank_suit={item} boardValue={''} onClick={() => handleHandClick(index)} /></Box>
+                let raisedState = handSelectedIndex === index ? 'raised' : '';
+
+                return <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 1 }}><PlayingCard handCardState={raisedState} rank_suit={item} boardValue={''} onClick={() => handleHandClick(index)} /></Box>
             })}
         </Box>;
 

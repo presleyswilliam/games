@@ -297,13 +297,13 @@ module.exports = (server) => {
     clientCallback(gameState);
   }
 
-  function swapHandCard(socket, roomName, teamName, handIndex) {
+  function selectHandCard(socket, params) {
     /* Prevent server crashing on undefined game => do nothing instead */
-    let game = activeGames?.[roomName]?.['game'];
+    let game = activeGames?.[params.roomName]?.['game'];
     if (game === undefined) { return; }
 
-    let didSwap = game.swapHandCard(teamName, handIndex);
-    if (didSwap) { io.emit('updateGameboard'); }
+    game.selectHandCard(params.teamName, params.handIndex);
+    io.emit('updateGameboard');
   }
 
   function placePiece(socket, roomName, teamName, coord) {
@@ -338,7 +338,7 @@ module.exports = (server) => {
     /*** Basic Game Functions ***/
     socket.on('getGameboardLayout', (roomName, clientCallback) => { getGameboardLayout(socket, roomName, clientCallback)} );
     socket.on('getGameState', (params, clientCallback) => { getGameState(socket, params, clientCallback)} );
-    socket.on('swapHandCard', (roomName, teamName, handIndex) => { swapHandCard(socket, roomName, teamName, handIndex)} );
+    socket.on('selectHandCard', (params) => { selectHandCard(socket, params)} );
     socket.on('placePiece', (roomName, teamName, coord) => { placePiece(socket, roomName, teamName, coord)} );
     // io.emit('updateGameboard');
 
