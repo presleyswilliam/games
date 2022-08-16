@@ -66,7 +66,7 @@ export default function PlayingCard (props) {
 
 
     cardJSX = (
-        <Card sx={{ height: '4.9vmax', width: '3.5vmax', maxHeight: '6vh', maxWidth: '4.29vh', backgroundColor: backgroundColor, boxShadow: boxShadow, color: color, border: '0.1px solid black', borderRadius: '0.25em', transition: 'margin 0.1s', margin: 0.5, marginBottom: handCardState === 'raised' ? 2 : null, cursor: 'pointer' }} onClick={props.onClick} >
+        <Card sx={{ height: '4.9vmax', width: '3.5vmax', maxHeight: '6vh', maxWidth: '4.29vh', backgroundColor: backgroundColor, boxShadow: boxShadow, color: color, border: '0.1px solid black', borderRadius: '0.25em', transition: 'margin 0.1s', margin: 0.5, marginBottom: handCardState === 'raised' ? 2 : null, cursor: 'pointer' }} onMouseDown={props.onClick} >
             <Stack sx={{ height: '100%' }} justifyContent='space-between'>
                 <Typography sx={{ fontSize: 'min(1.0vmax, 0.8em)', letterSpacing: 1, lineHeight: 1, textAlign: 'left', paddingTop: '1px', paddingLeft: '8%' }}>{cardTopBottomRowJSX}</Typography>
                 <Typography sx={{ fontSize: 'min(1.0vmax, 0.8em)', lineHeight: 1 }}>{cardMiddleRowJSX}</Typography>
