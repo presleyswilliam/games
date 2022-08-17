@@ -1,4 +1,17 @@
 class TicTacToe {
+    gameType: string;
+    minPlayers: number;
+    maxPlayers: number;
+    isStarted: boolean;
+
+    board: string[][];
+
+    teamNames: string[];
+    teamInfo: any;
+    turn: string;
+    winner: string | null;
+
+
     constructor() {
       this.gameType = 'TicTacToe';
       this.minPlayers = 2;
@@ -13,9 +26,10 @@ class TicTacToe {
 
       this.teamNames = ['Blue', 'Red'];
       this.teamInfo = {}; this.setupTeams();
-      this.turn;
-      this.winner;
+      this.turn = 'Blue';
+      this.winner = null;
     }
+
 
     setupTeams() {
       for (let i = 0; i < this.teamNames.length; i++) {
@@ -40,11 +54,11 @@ class TicTacToe {
       return teamName;
     }
 
-    joinTeam(teamName) {
+    joinTeam(teamName: string) {
       this.teamInfo[teamName]['teamsTally'] += 1;
     }
 
-    leaveTeam(teamName) {
+    leaveTeam(teamName: string) {
       this.teamInfo[teamName]['teamsTally'] -= 1;
     }
 
@@ -77,12 +91,12 @@ class TicTacToe {
       if (teamIndex === this.teamNames.length-1) { this.turn = this.teamNames[0]; } else { this.turn = this.teamNames[teamIndex+1]; }
     }
 
-    setWinner(winningTeamName) {
+    setWinner(winningTeamName: string) {
       this.winner = winningTeamName;
       this.turn = '';
     }
 
-    placePiece(team, coords) {
+    placePiece(team: string, coords: any) {
       if (this.turn != team) { return; }
       if (this.board[coords[0]][coords[1]] != '') { return; }
 
@@ -92,7 +106,7 @@ class TicTacToe {
     }
 
     checkWin() {
-      if (this.winner !== undefined) { return this.winner; }
+      if (this.winner !== null) { return this.winner; }
 
       let numInARowToWin = 3;
       let directions = [[0,1], [1,1], [1,0], [1,-1]];
@@ -127,7 +141,7 @@ class TicTacToe {
       return null;
     }
 
-    getGameState(params) {
+    getGameState(params: { roomName: string }) {
       let gameState = {};
       let gameboard = this.board;
       let turn = this.turn;
