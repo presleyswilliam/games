@@ -1,4 +1,19 @@
 class Sequence {
+    gameType: string;
+    isStarted: boolean;
+    deck: string[];
+    boardLayout: string[][];
+    board: string[][];
+
+    teamNames: string[];
+    teamInfo: any;
+    turn: string;
+    winner: string | null;
+    sequencesNeededToWin: number;
+
+    lastPlacedCoords: object;
+
+
     constructor() {
       this.gameType = 'Sequence';
       this.isStarted = false;
@@ -42,14 +57,15 @@ class Sequence {
 
       this.teamNames = ['Blue', 'Red', 'Green'];
       this.teamInfo = {}; this.setupTeams();
-      this.turn;
+      this.turn = 'Blue';
       this.winner = null;
       this.sequencesNeededToWin = 2;
 
       this.lastPlacedCoords = {};
     }
 
-    setupTeams() {
+
+    setupTeams(): void {
       for (let i = 0; i < this.teamNames.length; i++) {
         this.teamInfo[this.teamNames[i]] = {};
         this.teamInfo[this.teamNames[i]]['teamsTally'] = 0;
@@ -59,7 +75,7 @@ class Sequence {
       }
     }
 
-    assignTeam() {
+    assignTeam(): string {
       /* Assign team */
 
       let teamName = Math.random() < 0.5 ? this.teamNames[0] : this.teamNames[1];
@@ -70,25 +86,25 @@ class Sequence {
       return teamName;
     }
 
-    joinTeam(teamName) {
+    joinTeam(teamName: string): void {
       this.teamInfo[teamName]['teamsTally'] += 1;
     }
 
-    leaveTeam(teamName) {
+    leaveTeam(teamName: string): void {
       this.teamInfo[teamName]['teamsTally'] -= 1;
     }
 
-    canJoin() {
+    canJoin(): boolean {
       let canJoin = true;
       
       return canJoin;
     }
 
-    canStart() {
+    canStart(): boolean {
       let canStart = false;
 
       /* Check to make sure each team has players */
-      let teamsWithPlayers = [];
+      let teamsWithPlayers: string[] = [];
       for (const [team, teamInfoValues] of Object.entries(this.teamInfo)) {
         if (this.teamInfo[team]['teamsTally'] !== 0) { teamsWithPlayers.push(team); }
       }
@@ -98,14 +114,14 @@ class Sequence {
       return canStart;
     }
 
-    shuffle1DArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
+    shuffle1DArray<Type>(array: Type[]): void {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
       }
-  
-    startGame() {
+    }
+
+    startGame(): void {
       this.deck = ['black_joker','6_diamonds','7_diamonds','8_diamonds','9_diamonds','10_diamonds','Q_diamonds','K_diamonds','A_diamonds','black_joker',
                     '5_diamonds','3_hearts','2_hearts','2_spades','3_spades','4_spades','5_spades','6_spades','7_spades','A_clubs',
                     '4_diamonds','4_hearts','K_diamonds','A_diamonds','A_clubs','K_clubs','Q_clubs','10_clubs','8_spades','K_clubs',
@@ -143,17 +159,17 @@ class Sequence {
       this.turn = this.teamNames[0];
     }
 
-    nextTurn() {
+    nextTurn(): void {
       let teamIndex = this.teamNames.indexOf(this.turn);
       if (teamIndex === this.teamNames.length-1) { this.turn = this.teamNames[0]; } else { this.turn = this.teamNames[teamIndex+1]; }
     }
 
-    swapCard(team, handIndex) {
+    swapCard(team: string, handIndex: number): void {
       this.teamInfo[team]['hand'].splice(handIndex, 1);
       if (this.deck.length > 0) { this.teamInfo[team]['hand'].push(this.deck.pop()); }
     }
 
-    readyHandCard(team, handIndex) {
+    readyHandCard(team: string, handIndex: number): boolean {
       if (this.teamInfo[team]['selectedCardIndex'] === null) {
         this.teamInfo[team]['selectedCardIndex'] = handIndex;
         return true;
@@ -163,7 +179,7 @@ class Sequence {
       }
     }
 
-    selectHandCard(team, handIndex) {
+    selectHandCard(team: string, handIndex: number): void {
       if (this.teamInfo[team]['selectedCardIndex'] === handIndex) {
         this.teamInfo[team]['selectedCardIndex'] = null;
         this.swapHandCard(team, handIndex);
@@ -172,11 +188,11 @@ class Sequence {
       }
     }
 
-    swapHandCard(team, handIndex) {
+    swapHandCard(team: string, handIndex: number): boolean | undefined {
       let handCardRank = this.teamInfo[team]['hand'][handIndex];
       if (handCardRank === 'J_twoEyed' || handCardRank === 'J_oneEyed') { return; }
 
-      let foundArray = [];
+      let foundArray: string[] = [];
       for (let i = 0; i < this.board.length; i++) {
         for (let j = 0; j < this.board[i].length; j++) {
           if (this.boardLayout[i][j] === handCardRank && this.board[i][j] !== '') { foundArray.push(i + '_' + j); }
@@ -188,7 +204,7 @@ class Sequence {
       // console.log(this.board[rowIndex][colIndex])
     }
 
-    placePiece(team, coords) {
+    placePiece(team: string, coords: any): void {
       if (this.turn != team) { return; }
 
       let boardCardRank = this.board[coords['boardCoords'][0]][coords['boardCoords'][1]];
@@ -208,13 +224,13 @@ class Sequence {
       this.nextTurn();
     }
 
-    tallySequencesForWinner(teamName) {
+    tallySequencesForWinner(teamName: string): string | null {
       this.teamInfo[teamName]['sequences'] += 1;
       if (this.teamInfo[teamName]['sequences'] === this.sequencesNeededToWin) { this.winner = teamName; this.turn = ''; return this.winner; }
       return null;
     }
 
-    checkWin() {
+    checkWin(): string | null {
       /* Winner already defined */
       if (this.winner !== null) { return this.winner; }
 
@@ -260,8 +276,8 @@ class Sequence {
       } //end direction
       return null;
     }
-
-    getGameState(params) {
+    
+    getGameState(params: { roomName: string; teamName: string }): object {
       let gameState = {};
       let gameboard = this.board;
       let turn = this.turn;

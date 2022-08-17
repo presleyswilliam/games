@@ -1,8 +1,8 @@
 module.exports = (server) => {
   const { instrument } = require('@socket.io/admin-ui');  // https://admin.socket.io/#/
   const socketIO = require('socket.io');  // https://socket.io/docs/v4/server-api/
-  const Sequence = require('../public/GameDefinitions/Sequence');
-  const TicTacToe = require('../public/GameDefinitions/TicTacToe');
+  const Sequence = require('../GameDefinitions/Sequence');
+  const TicTacToe = require('../GameDefinitions/TicTacToe');
   const io = socketIO(server, {
     cors: {
       origin: ["https://admin.socket.io"],
@@ -120,7 +120,7 @@ module.exports = (server) => {
 
   function getNumJoined(roomName) {
     let room = io.sockets.adapter.rooms.get(roomName);
-    numJoined = room.size;
+    let numJoined = room.size;
     return numJoined;
   }
 
@@ -149,11 +149,11 @@ module.exports = (server) => {
       modifiedActiveGames[key]['teamInfo'] = JSON.parse(JSON.stringify(activeGames[key]['game'].teamInfo));
 
       /* canStart */
-      let canStart = activeGames[key]['game'].canStart(numJoined);
+      let canStart = activeGames[key]['game'].canStart();
       modifiedActiveGames[key]['canStart'] = canStart;
 
       /* canJoin */
-      let canJoin = activeGames[key]['game'].canJoin(numJoined);
+      let canJoin = activeGames[key]['game'].canJoin();
       modifiedActiveGames[key]['canJoin'] = canJoin;
 
       /* isJoined flag */

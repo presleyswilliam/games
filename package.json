@@ -25,12 +25,15 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "tsc --project server/tsconfig.json && react-scripts start",
+    "build": "tsc --project server/tsconfig.json && react-scripts build",
+    "test": "tsc --project server/tsconfig.json && react-scripts test",
     "eject": "react-scripts eject",
+
     "go": "npm run build && node index.js",
-    "about:go": "echo 'Custom command for npm run build followed by node index.js'"
+    "about:go": "echo 'Custom command for npm run build followed by node index.js'",
+
+    "tsc": "tsc"
   },
   "eslintConfig": {
     "extends": [

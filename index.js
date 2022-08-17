@@ -9,7 +9,7 @@ const server = app.listen(PORT);
 
 app.use(express.json({}));
 
-require('./SocketLogic/games')(server);
+require('./build_node/SocketLogic/games')(server);
 
 app.get('*', function (req, res) {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
