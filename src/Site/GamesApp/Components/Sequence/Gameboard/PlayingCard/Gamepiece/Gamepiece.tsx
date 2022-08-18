@@ -3,7 +3,12 @@ import { FaCrown } from 'react-icons/fa';
 import { MdCircle } from 'react-icons/md';
 import './Gamepiece.css';
 
-export default function Gamepiece (props) {
+interface GamepieceProps {
+    boardValue: string;
+    isLastPlaced: boolean;
+}
+
+export default function Gamepiece (props: GamepieceProps) {
 /* API */
     
 
