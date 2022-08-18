@@ -31,7 +31,7 @@ class TicTacToe {
     }
 
 
-    setupTeams() {
+    setupTeams(): void {
       for (let i = 0; i < this.teamNames.length; i++) {
         this.teamInfo[this.teamNames[i]] = {};
         this.teamInfo[this.teamNames[i]]['teamsTally'] = 0;
@@ -43,7 +43,7 @@ class TicTacToe {
       // });
     }
 
-    assignTeam() {
+    assignTeam(): string {
       /* Assign team */
 
       let teamName = Math.random() < 0.5 ? this.teamNames[0] : this.teamNames[1];
@@ -54,21 +54,21 @@ class TicTacToe {
       return teamName;
     }
 
-    joinTeam(teamName: string) {
+    joinTeam(teamName: string): void {
       this.teamInfo[teamName]['teamsTally'] += 1;
     }
 
-    leaveTeam(teamName: string) {
+    leaveTeam(teamName: string): void {
       this.teamInfo[teamName]['teamsTally'] -= 1;
     }
 
-    canJoin() {
+    canJoin(): boolean {
       let canJoin = true;
       
       return canJoin;
     }
 
-    canStart() {
+    canStart(): boolean {
       let canStart = false;
 
       /* Check to make sure each team has players */
@@ -82,21 +82,21 @@ class TicTacToe {
       return canStart;
     }
   
-    startGame() {
+    startGame(): void {
       this.turn = this.teamNames[0];
     }
 
-    nextTurn() {
+    nextTurn(): void {
       let teamIndex = this.teamNames.indexOf(this.turn);
       if (teamIndex === this.teamNames.length-1) { this.turn = this.teamNames[0]; } else { this.turn = this.teamNames[teamIndex+1]; }
     }
 
-    setWinner(winningTeamName: string) {
+    setWinner(winningTeamName: string): void {
       this.winner = winningTeamName;
       this.turn = '';
     }
 
-    placePiece(team: string, coords: any) {
+    placePiece(team: string, coords: any): void {
       if (this.turn != team) { return; }
       if (this.board[coords[0]][coords[1]] != '') { return; }
 
@@ -105,7 +105,7 @@ class TicTacToe {
       this.nextTurn();
     }
 
-    checkWin() {
+    checkWin(): string | null {
       if (this.winner !== null) { return this.winner; }
 
       let numInARowToWin = 3;
@@ -141,7 +141,7 @@ class TicTacToe {
       return null;
     }
 
-    getGameState(params: { roomName: string }) {
+    getGameState(params: { roomName: string }): object {
       let gameState = {};
       let gameboard = this.board;
       let turn = this.turn;
