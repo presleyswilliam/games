@@ -29,10 +29,9 @@
     "build": "tsc --project server/tsconfig.json && react-scripts build",
     "test": "tsc --project server/tsconfig.json && react-scripts test",
     "eject": "react-scripts eject",
-
-    "go": "npm run build && node index.js",
-    "about:go": "echo 'Custom command for npm run build followed by node index.js'",
-
+    "nodemon": "nodemon --config nodemon.json",
+    "dev": "react-scripts build && ts-node --project server/tsconfig.development.json index.js",
+    "about:dev": "echo 'Custom command for npm run build followed by node index.js'",
     "tsc": "tsc"
   },
   "eslintConfig": {
@@ -52,5 +51,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.19",
+    "ts-node": "^10.9.1"
   }
 }
