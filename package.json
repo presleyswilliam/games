@@ -2,6 +2,7 @@
   "name": "games_ts",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:9000",
   "dependencies": {
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "^11.9.3",
@@ -25,13 +26,14 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "tsc --project server/tsconfig.json && react-scripts start",
+    "start": "react-scripts start",
     "build": "tsc --project server/tsconfig.json && react-scripts build",
     "test": "tsc --project server/tsconfig.json && react-scripts test",
     "eject": "react-scripts eject",
     "nodemon": "nodemon --config nodemon.json",
-    "dev": "react-scripts build && ts-node --project server/tsconfig.development.json index.js",
-    "about:dev": "echo 'Custom command for npm run build followed by node index.js'",
+    "dev": "ts-node --project server/tsconfig.development.json index.js",
+    "go": "tsc --project server/tsconfig.json && react-scripts build && node index.js",
+    "about:go": "echo 'Custom command for npm run build followed by node index.js'",
     "tsc": "tsc"
   },
   "eslintConfig": {
